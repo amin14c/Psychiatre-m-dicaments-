@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>RxAI — Assistant Médical</title>
+<style>
+:root{
+  --navy:#0a1628;--navy2:#0f2040;--teal:#0d9488;--teal2:#14b8a6;
+  --tealL:#ccfbf1;--gold:#f59e0b;--red:#ef4444;--green:#22c55e;
+  --gray1:#f1f5f9;--gray2:#94a3b8;--gray3:#475569;
+  --text:#1e293b;--border:#e2e8f0;--bg:#f0f4f8;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{height:100%;}
+body{font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);height:100%;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── SCREENS ── */
+.scr{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.scr.on{display:flex;}
+
+/* ══════════════════ LOGIN ══════════════════ */
+#s-login{background:linear-gradient(135deg,#0a1628,#0f3460,#16213e);justify-content:center;align-items:center;overflow-y:auto;padding:20px;}
+.lcard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:34px 26px;width:100%;max-width:400px;}
+.llogo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:6px;}
+.lico{width:46px;height:46px;background:linear-gradient(135deg,var(--teal),var(--teal2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.ltitle{font-size:26px;font-weight:900;color:#fff;}
+.lsub{text-align:center;color:rgba(255,255,255,.5);font-size:12px;margin-bottom:22px;}
+.llbl{color:rgba(255,255,255,.7);font-size:12px;margin-bottom:4px;display:block;margin-top:10px;}
+.linput{width:100%;padding:11px 13px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:9px;color:#fff;font-family:inherit;font-size:14px;outline:none;direction:ltr;}
+.linput::placeholder{color:rgba(255,255,255,.3);}
+.linput:focus{border-color:var(--teal2);}
+.lbtn{width:100%;padding:13px;background:var(--teal);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px;}
+.anote{margin-top:12px;padding:10px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:8px;color:rgba(255,255,255,.65);font-size:11px;line-height:1.6;text-align:center;}
+.anote a{color:var(--gold);}
+
+/* ══════════════════ APP ══════════════════ */
+.navbar{background:var(--navy);padding:0 12px;height:50px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.3);z-index:50;}
+.nbrand{display:flex;align-items:center;gap:7px;}
+.nico{width:26px;height:26px;background:linear-gradient(135deg,var(--teal),var(--teal2));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.ntitle{font-size:16px;font-weight:900;color:#fff;}
+.ntitle span{color:var(--teal2);}
+.zoom-bar{display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:2px 8px;}
+.zb{background:none;border:none;color:var(--teal2);font-size:17px;cursor:pointer;line-height:1;padding:0 1px;font-weight:700;}
+.zl{color:#fff;font-size:11px;font-weight:700;min-width:32px;text-align:center;}
+.zr{background:rgba(13,148,136,.3);border:none;color:#fff;border-radius:4px;cursor:pointer;font-size:9px;padding:2px 5px;}
+.nbadge{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:3px 7px;color:rgba(255,255,255,.8);font-size:11px;max-width:110px;}
+.nav-av{width:19px;height:19px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--gold));display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700;flex-shrink:0;}
+.bout{background:transparent;border:1px solid rgba(239,68,68,.3);color:rgba(239,68,68,.75);border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;font-family:inherit;}
+
+/* ── SCROLL AREA ── */
+.app-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:62px;}
+.sw{transform-origin:top left;}
+
+/* ── VIEWS ── */
+.view{display:none;padding:14px;}
+.view.on{display:block;}
+.ptitle{font-size:17px;font-weight:700;margin-bottom:2px;direction:rtl;}
+.psub{font-size:12px;color:var(--gray2);margin-bottom:14px;direction:rtl;}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:14px;}
+.sc{background:#fff;border-radius:11px;padding:12px 13px;box-shadow:0 2px 7px rgba(0,0,0,.07);border-top:3px solid var(--border);}
+.sc.t{border-top-color:var(--teal);}
+.sc.g{border-top-color:var(--gold);}
+.sc.n{border-top-color:var(--navy);}
+.snum{font-size:22px;font-weight:900;}
+.slb{font-size:10px;color:var(--gray2);margin-top:1px;direction:rtl;}
+
+/* ── SEARCH BAR ── */
+.search-bar{position:relative;margin-bottom:12px;}
+.search-bar input{width:100%;padding:10px 36px 10px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px;outline:none;background:#fff;direction:rtl;}
+.search-bar input:focus{border-color:var(--teal);}
+.search-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--gray2);}
+
+/* ── PATIENT LIST ── */
+.pt-list{display:flex;flex-direction:column;gap:9px;}
+.pt-row{background:#fff;border-radius:11px;padding:11px 13px;cursor:pointer;border-right:4px solid var(--teal);box-shadow:0 1px 5px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center;}
+.pt-row:active{background:#f0fdfa;}
+.pt-name{font-size:13px;font-weight:700;direction:rtl;}
+.pt-meta{font-size:11px;color:var(--gray2);margin-top:1px;direction:rtl;}
+.pt-diag{background:var(--tealL);color:var(--teal);font-size:10px;padding:2px 7px;border-radius:15px;font-weight:600;display:block;margin-bottom:3px;text-align:center;}
+.pt-date{font-size:10px;color:var(--gray2);text-align:center;}
+.empty-box{text-align:center;color:var(--gray2);padding:26px 0;direction:rtl;}
+.empty-ico{font-size:36px;margin-bottom:8px;}
+
+/* ── CARDS ── */
+.fc{background:#fff;border-radius:13px;box-shadow:0 2px 7px rgba(0,0,0,.07);overflow:hidden;margin-bottom:13px;}
+.fh{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:11px 16px;display:flex;align-items:center;gap:8px;}
+.fh h3{color:#fff;font-size:13px;font-weight:700;margin:0;flex:1;direction:rtl;}
+.fb{padding:14px;}
+
+/* ── FORM ── */
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:11px;}
+.fg:last-child{margin-bottom:0;}
+.flbl{font-size:12px;font-weight:700;color:var(--gray3);direction:rtl;}
+.flbl em{color:var(--red);font-style:normal;}
+.fi{padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:14px;color:var(--text);outline:none;background:#fff;width:100%;}
+.fi:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(13,148,136,.1);}
+textarea.fi{resize:vertical;line-height:1.6;direction:rtl;}
+select.fi{direction:rtl;cursor:pointer;}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+
+/* ── DRUG AUTOCOMPLETE ── */
+.drug-wrap{position:relative;}
+.drug-input-row{display:flex;gap:7px;}
+.drug-input-row .fi{flex:1;}
+.drug-add-btn{padding:9px 12px;background:var(--teal);color:#fff;border:none;border-radius:7px;font-size:14px;cursor:pointer;flex-shrink:0;}
+.drug-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--teal);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:200;max-height:280px;overflow-y:auto;margin-top:3px;}
+.drug-item{padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border);}
+.drug-item:last-child{border-bottom:none;}
+.drug-item:active,.drug-item:hover{background:var(--tealL);}
+.di-name{font-size:13px;font-weight:700;color:var(--text);}
+.di-class{font-size:10px;color:var(--gray2);margin-top:1px;}
+.di-doses{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
+.di-dose{background:var(--gray1);border:1px solid var(--border);border-radius:5px;padding:2px 7px;font-size:11px;color:var(--gray3);cursor:pointer;}
+.di-dose:active,.di-dose:hover{background:var(--teal);color:#fff;border-color:var(--teal);}
+.drug-card{background:var(--tealL);border:1px solid rgba(13,148,136,.3);border-radius:8px;padding:8px 10px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:flex-start;}
+.dc-info{flex:1;}
+.dc-name{font-size:12px;font-weight:700;color:var(--teal);}
+.dc-dose{font-size:11px;color:var(--gray3);margin-top:1px;}
+.dc-del{background:none;border:none;color:var(--gray2);cursor:pointer;font-size:16px;padding:0 2px;line-height:1;}
+.dc-del:active{color:var(--red);}
+.drug-list-added{margin-top:8px;}
+
+/* ── DOSE PICKER MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end;justify-content:center;}
+.modal-bg.hidden{display:none;}
+.modal-box{background:#fff;border-radius:18px 18px 0 0;padding:20px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto;}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--gray2);margin-bottom:14px;}
+.dose-info{background:var(--gray1);border-radius:8px;padding:11px;margin-bottom:12px;font-size:12px;line-height:1.8;}
+.dose-info strong{color:var(--teal);}
+.dose-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
+.dose-chip{padding:8px 14px;background:var(--gray1);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text);}
+.dose-chip:active,.dose-chip.sel{background:var(--teal);color:#fff;border-color:var(--teal);}
+.dose-qty{display:flex;gap:8px;align-items:center;margin-bottom:14px;}
+.dose-qty label{font-size:12px;color:var(--gray3);white-space:nowrap;}
+.dose-qty select{flex:1;padding:8px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;outline:none;}
+.modal-actions{display:flex;gap:9px;}
+.mok{flex:1;padding:11px;background:var(--teal);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+.mcancel{padding:11px 16px;background:var(--gray1);color:var(--gray3);border:none;border-radius:9px;font-family:inherit;font-size:14px;cursor:pointer;}
+
+/* ── AI PANEL ── */
+.aipanel{background:linear-gradient(135deg,var(--navy),#0f3460);border-radius:13px;padding:17px;overflow:hidden;}
+.ai-t{color:#fff;font-size:14px;font-weight:700;margin-bottom:4px;direction:rtl;}
+.ai-s{color:rgba(255,255,255,.5);font-size:12px;margin-bottom:12px;direction:rtl;}
+.ai-pipe{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.ap-item{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:3px 7px;color:rgba(255,255,255,.75);font-size:10px;}
+.ap-arrow{color:rgba(255,255,255,.3);font-size:12px;}
+.ai-disc{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.28);border-radius:7px;padding:9px 11px;margin-bottom:12px;color:rgba(255,255,255,.8);font-size:11px;line-height:1.6;direction:rtl;}
+.ai-run{width:100%;padding:12px;background:var(--teal);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;}
+.ai-run:disabled{background:#444;cursor:not-allowed;}
+.ai-step-txt{color:rgba(255,255,255,.6);font-size:11px;margin-top:8px;text-align:center;direction:rtl;min-height:16px;}
+.ai-src-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;}
+.ai-src-lbl{color:rgba(255,255,255,.4);font-size:10px;direction:rtl;}
+.ai-src-b{background:rgba(13,148,136,.3);border:1px solid rgba(13,148,136,.5);color:var(--teal2);font-size:10px;padding:1px 7px;border-radius:15px;font-weight:700;}
+.ai-res{margin-top:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:13px;}
+.ai-res-txt{color:rgba(255,255,255,.88);font-size:12px;line-height:1.85;white-space:pre-wrap;direction:ltr;text-align:left;font-family:monospace;max-height:340px;overflow-y:auto;}
+.ai-acts{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap;}
+.ai-ab{flex:1;padding:9px 13px;background:var(--teal);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;direction:rtl;}
+.ai-rb{flex:1;padding:9px 13px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:7px;font-family:inherit;font-size:13px;cursor:pointer;direction:rtl;}
+
+/* ── RX ── */
+.rxpaper{background:#fff;border-radius:13px;box-shadow:0 4px 18px rgba(0,0,0,.1);overflow:hidden;}
+.rxh{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:14px 18px;display:flex;justify-content:space-between;align-items:flex-start;}
+.rx-dn{font-size:16px;font-weight:900;color:#fff;margin-bottom:2px;}
+.rx-ds{color:rgba(255,255,255,.6);font-size:11px;}
+.rx-dh{color:rgba(255,255,255,.4);font-size:10px;margin-top:4px;}
+.rxb{padding:16px;}
+.rxsec{font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--gray2);text-transform:uppercase;padding-bottom:4px;border-bottom:1px solid var(--border);margin-bottom:9px;margin-top:12px;}
+.rx-pfield{display:flex;gap:7px;margin-bottom:5px;}
+.rx-fl{font-size:11px;color:var(--gray2);min-width:80px;}
+.rx-fv{font-size:12px;font-weight:700;direction:rtl;}
+.rxarea{width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;line-height:1.8;color:var(--text);outline:none;resize:vertical;direction:rtl;background:#fafbfc;}
+.rxarea:focus{border-color:var(--teal);}
+.rxfoot{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;background:#f8fafc;border-top:1px solid var(--border);}
+.rx-df{font-size:11px;color:var(--gray2);}
+.rx-siglbl{font-size:10px;color:var(--gray2);}
+.rx-sigline{width:110px;border-bottom:1px solid var(--border);margin-top:22px;}
+
+/* ── SETTINGS ── */
+.scard{background:#fff;border-radius:13px;box-shadow:0 2px 7px rgba(0,0,0,.07);padding:16px;margin-bottom:13px;}
+.scard h3{font-size:13px;font-weight:700;margin-bottom:13px;padding-bottom:8px;border-bottom:1px solid var(--border);direction:rtl;}
+.srow{display:flex;flex-direction:column;gap:4px;margin-bottom:11px;}
+.slbl{font-size:12px;font-weight:700;color:var(--gray3);direction:rtl;}
+.shint{font-size:10px;color:var(--gray2);margin-top:2px;direction:rtl;}
+.shint a{color:var(--teal);}
+.srcinfo{background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:12px;padding:14px;}
+.si-title{color:var(--teal2);font-size:12px;font-weight:700;margin-bottom:10px;direction:rtl;}
+.si-item{display:flex;gap:9px;margin-bottom:10px;padding:9px 10px;background:rgba(255,255,255,.05);border-radius:8px;}
+.si-ico{font-size:18px;}
+.si-name{color:#fff;font-size:12px;font-weight:700;}
+.si-desc{color:rgba(255,255,255,.5);font-size:10px;margin-top:1px;line-height:1.4;direction:rtl;}
+.si-free{background:rgba(13,148,136,.3);color:var(--teal2);font-size:9px;padding:1px 6px;border-radius:8px;display:inline-block;margin-top:4px;}
+
+/* ── BUTTONS ── */
+.bp{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;direction:rtl;}
+.bs{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#fff;color:var(--text);border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;direction:rtl;}
+.bpr{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;direction:rtl;}
+.actrow{display:flex;gap:9px;justify-content:flex-end;margin-top:13px;flex-wrap:wrap;}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--navy);display:flex;border-top:1px solid rgba(255,255,255,.1);z-index:100;height:56px;}
+.bn{flex:1;padding:7px 0;background:transparent;border:none;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;color:rgba(255,255,255,.5);}
+.bn.on{color:var(--teal2);}
+.bn-ico{font-size:19px;}
+.bn-lbl{font-size:9px;direction:rtl;}
+.bn-dot{width:3px;height:3px;border-radius:50%;background:var(--teal2);margin-top:1px;}
+
+/* ── SPINNER ── */
+.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%);background:var(--teal);color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.25);white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none;}
+#toast.on{opacity:1;}
+#toast.err{background:var(--red);}
+
+/* ── PRINT ── */
+@media print{
+  .navbar,.bnav,.actrow,.zoom-bar,.bout,.np,#toast{display:none!important;}
+  .app-body{padding-bottom:0;overflow:visible;}
+  body{overflow:visible;height:auto;}
+  .rxpaper{box-shadow:none;border-radius:0;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="s-login" class="scr on">
+  <div class="lcard">
+    <div class="llogo">
+      <div class="lico">💊</div>
+      <div class="ltitle">Rx<span style="color:var(--teal2)">AI</span></div>
+    </div>
+    <p class="lsub">Assistant Médical Psychiatrique — المساعد الطبي النفسي</p>
+    <label class="llbl">Nom du médecin / اسم الطبيب</label>
+    <input id="i-name" class="linput" type="text" placeholder="Dr. Amin Bellala">
+    <label class="llbl">Spécialité / التخصص</label>
+    <input id="i-spec" class="linput" type="text" placeholder="Psychiatre — Psychologue Clinicien">
+    <label class="llbl">🔑 Gemini API Key</label>
+    <input id="i-key" class="linput" type="password" placeholder="AIza...">
+    <button class="lbtn" id="login-btn">Connexion — دخول ←</button>
+    <div class="anote">
+      Clé Gemini gratuite sur <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a><br>
+      <span style="color:rgba(255,255,255,.4)">PubMed + OpenFDA : sans clé</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ APP ══════════ -->
+<div id="s-app" class="scr">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nbrand">
+      <div class="nico">💊</div>
+      <span class="ntitle">Rx<span>AI</span></span>
+    </div>
+    <div class="zoom-bar">
+      <button class="zb" id="zm">−</button>
+      <span class="zl" id="zl">100%</span>
+      <button class="zb" id="zp">+</button>
+      <button class="zr" id="zr0">↺</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div class="nbadge">
+        <div class="nav-av" id="nav-av">A</div>
+        <span id="nav-nm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Dr. Amin</span>
+      </div>
+      <button class="bout" id="logout-btn">خروج</button>
+    </div>
+  </nav>
+
+  <!-- SCROLLABLE -->
+  <div class="app-body" id="app-body">
+    <div class="sw" id="sw">
+
+      <!-- ════ DASHBOARD ════ -->
+      <div id="v-dash" class="view on">
+        <div class="ptitle">لوحة التحكم</div>
+        <div class="psub" id="dash-sub">مرحباً — إليك نظرة عامة على عملك</div>
+        <div class="stats">
+          <div class="sc t"><div class="snum" id="st-tot">0</div><div class="slb">المرضى</div></div>
+          <div class="sc g"><div class="snum" id="st-tod">0</div><div class="slb">وصفات اليوم</div></div>
+          <div class="sc n"><div class="snum" id="st-ai">0</div><div class="slb">استشارات AI</div></div>
+        </div>
+        <div class="fc">
+          <div class="fh"><h3>👥 قائمة المرضى</h3></div>
+          <div class="fb">
+            <div class="search-bar">
+              <input type="text" id="pt-search" placeholder="بحث بالاسم أو التشخيص..." style="direction:rtl">
+              <span class="search-ico">🔍</span>
+            </div>
+            <div id="pt-list" class="pt-list">
+              <div class="empty-box"><div class="empty-ico">📋</div><div>لا يوجد مرضى — اضغط "مريض جديد"</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ NEW PATIENT ════ -->
+      <div id="v-new" class="view">
+        <div class="ptitle" id="new-title">ملف مريض جديد</div>
+        <div class="psub">أدخل البيانات للحصول على اقتراح دوائي مبني على دراسات حقيقية</div>
+
+        <div class="fc">
+          <div class="fh"><h3>👤 معلومات المريض</h3></div>
+          <div class="fb">
+            <div class="fg2">
+              <div class="fg">
+                <label class="flbl">الاسم <em>*</em></label>
+                <input class="fi" id="p-name" type="text" placeholder="أحمد بن علي" style="direction:rtl">
+              </div>
+              <div class="fg">
+                <label class="flbl">العمر <em>*</em></label>
+                <input class="fi" id="p-age" type="number" placeholder="35">
+              </div>
+            </div>
+            <div class="fg2">
+              <div class="fg">
+                <label class="flbl">الجنس</label>
+                <select class="fi" id="p-sex">
+                  <option value="m">ذكر — Homme</option>
+                  <option value="f">أنثى — Femme</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label class="flbl">الوظيفة</label>
+                <input class="fi" id="p-job" type="text" placeholder="Enseignant" style="direction:ltr">
+              </div>
+            </div>
+            <div class="fg">
+              <label class="flbl">Antécédents médicaux / أمراض مزمنة</label>
+              <input class="fi" id="p-chr" type="text" placeholder="Diabète, HTA..." style="direction:ltr">
+            </div>
+            <!-- DRUG AUTOCOMPLETE: current meds -->
+            <div class="fg">
+              <label class="flbl">Médicaments actuels / الأدوية الحالية</label>
+              <div class="drug-wrap" id="dw-cur">
+                <div class="drug-input-row">
+                  <input class="fi" id="drug-cur-input" type="text" placeholder="Taper le nom du médicament..." style="direction:ltr" autocomplete="off">
+                  <button class="drug-add-btn" id="drug-cur-add" title="Ajouter">+</button>
+                </div>
+                <div class="drug-dropdown" id="dd-cur" style="display:none"></div>
+                <div class="drug-list-added" id="dl-cur"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc">
+          <div class="fh"><h3>🩺 البيانات السريرية</h3></div>
+          <div class="fb">
+            <div class="fg">
+              <label class="flbl">الأعراض <em>*</em></label>
+              <textarea class="fi" id="p-sym" rows="3" placeholder="Dépression sévère avec insomnie, perte d'appétit depuis 3 semaines..." style="direction:ltr"></textarea>
+            </div>
+            <div class="fg">
+              <label class="flbl">التشخيص <em>*</em></label>
+              <input class="fi" id="p-diag" type="text" placeholder="Épisode dépressif majeur F32.2" style="direction:ltr">
+            </div>
+            <div class="fg2">
+              <div class="fg">
+                <label class="flbl">الشدة</label>
+                <select class="fi" id="p-sev">
+                  <option value="mild">Légère — خفيفة</option>
+                  <option value="moderate" selected>Modérée — متوسطة</option>
+                  <option value="severe">Sévère — شديدة</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label class="flbl">المدة</label>
+                <input class="fi" id="p-dur" type="text" placeholder="3 semaines">
+              </div>
+            </div>
+            <div class="fg">
+              <label class="flbl">ملاحظات الطبيب</label>
+              <textarea class="fi" id="p-note" rows="2" placeholder="Notes cliniques..." style="direction:ltr"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="actrow">
+          <button class="bs" id="btn-back-dash">↩ رجوع</button>
+          <button class="bs" id="btn-save-pt">💾 حفظ المريض</button>
+          <button class="bp" id="btn-go-ai">🤖 اقتراح دوائي</button>
+        </div>
+      </div>
+
+      <!-- ════ AI ════ -->
+      <div id="v-ai" class="view">
+        <div class="ptitle">الاقتراح الدوائي الذكي</div>
+        <div class="psub">PubMed + OpenFDA + Gemini AI — بحث حي في الدراسات</div>
+        <div class="aipanel">
+          <div class="ai-t">🔬 استشارة مبنية على أدلة علمية حقيقية</div>
+          <p class="ai-s" id="ai-sum"></p>
+          <div class="ai-pipe">
+            <span class="ap-item">🔍 PubMed</span>
+            <span class="ap-arrow">›</span>
+            <span class="ap-item">💊 OpenFDA</span>
+            <span class="ap-arrow">›</span>
+            <span class="ap-item">🤖 Gemini</span>
+            <span class="ap-arrow">›</span>
+            <span class="ap-item">📋 Résultat</span>
+          </div>
+          <div class="ai-disc">⚠️ Ces suggestions sont consultatives uniquement. La décision thérapeutique finale appartient exclusivement au médecin traitant.</div>
+          <button class="ai-run" id="ai-btn">✨ Lancer l'analyse</button>
+          <div class="ai-step-txt" id="ai-step"></div>
+          <div class="ai-src-row" id="ai-src" style="display:none">
+            <span class="ai-src-lbl">مصادر:</span>
+            <span class="ai-src-b">✓ PubMed NCBI</span>
+            <span class="ai-src-b">✓ OpenFDA</span>
+          </div>
+          <div class="ai-res" id="ai-res" style="display:none">
+            <div class="ai-res-txt" id="ai-txt"></div>
+            <div class="ai-acts">
+              <button class="ai-ab" id="btn-use-rx">✅ Utiliser dans l'ordonnance</button>
+              <button class="ai-rb" id="btn-regen">🔄 Régénérer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ PRESCRIPTION ════ -->
+      <div id="v-rx" class="view">
+        <div class="ptitle np">Ordonnance Médicale — الوصفة الطبية</div>
+        <div class="psub np">راجع وعدّل الوصفة — القرار النهائي للطبيب</div>
+        <div class="rxpaper">
+          <div class="rxh">
+            <div>
+              <div class="rx-dn" id="rx-dn">—</div>
+              <div class="rx-ds" id="rx-ds">—</div>
+              <div class="rx-dh" id="rx-dh"></div>
+            </div>
+            <div style="font-size:28px;opacity:.35">💊</div>
+          </div>
+          <div class="rxb">
+            <div class="rxsec">Patient / المريض</div>
+            <div class="rx-pfield"><div class="rx-fl">Nom:</div><div class="rx-fv" id="rx-n">—</div></div>
+            <div class="rx-pfield"><div class="rx-fl">Âge / Sexe:</div><div class="rx-fv" id="rx-a">—</div></div>
+            <div class="rx-pfield"><div class="rx-fl">Diagnostic:</div><div class="rx-fv" id="rx-d">—</div></div>
+            <div class="rxsec">Prescription / الوصفة الدوائية</div>
+
+            <!-- PRESCRIPTION DRUG SELECTOR -->
+            <div class="fg" style="margin-bottom:11px">
+              <label class="flbl">إضافة دواء للوصفة / Ajouter médicament</label>
+              <div class="drug-wrap" id="dw-rx">
+                <div class="drug-input-row">
+                  <input class="fi" id="drug-rx-input" type="text" placeholder="Taper le nom..." style="direction:ltr" autocomplete="off">
+                  <button class="drug-add-btn" id="drug-rx-add" title="Ajouter">+</button>
+                </div>
+                <div class="drug-dropdown" id="dd-rx" style="display:none"></div>
+                <div class="drug-list-added" id="dl-rx" style="margin-top:8px"></div>
+              </div>
+            </div>
+
+            <div class="rxsec">Texte libre / نص حر</div>
+            <textarea class="rxarea" id="rx-drugs" rows="6" placeholder="Complétez ou modifiez la prescription ici..."></textarea>
+            <div class="rxsec">Instructions / تعليمات للمريض</div>
+            <textarea class="rxarea" id="rx-inst" rows="3" placeholder="Prendre après repas, éviter l'alcool..."></textarea>
+          </div>
+          <div class="rxfoot">
+            <div class="rx-df" id="rx-df"></div>
+            <div><div class="rx-sig-lbl">Signature du médecin — توقيع الطبيب</div><div class="rx-sigline"></div></div>
+          </div>
+        </div>
+        <div class="actrow np">
+          <button class="bs" id="btn-back-ai">↩ رجوع</button>
+          <button class="bs" id="btn-save-rx">💾 حفظ</button>
+          <button class="bpr" id="btn-print">🖨️ طباعة</button>
+        </div>
+      </div>
+
+      <!-- ════ SETTINGS ════ -->
+      <div id="v-set" class="view">
+        <div class="ptitle">الإعدادات</div>
+        <div class="psub">Paramètres de l'application</div>
+        <div class="scard">
+          <h3>Informations du médecin / معلومات الطبيب</h3>
+          <div class="srow"><label class="slbl">Nom</label><input class="fi" id="s-name" type="text"></div>
+          <div class="srow"><label class="slbl">Spécialité</label><input class="fi" id="s-spec" type="text"></div>
+          <div class="srow">
+            <label class="slbl">Gemini API Key</label>
+            <input class="fi" id="s-key" type="password" placeholder="AIza..." style="direction:ltr">
+            <div class="shint">Gratuit sur <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></div>
+          </div>
+          <button class="bp" id="btn-save-set" style="width:100%;justify-content:center">💾 Enregistrer</button>
+        </div>
+        <div class="srcinfo">
+          <div class="si-title">🔬 Sources de données médicales</div>
+          <div class="si-item"><span class="si-ico">🔬</span><div><div class="si-name">PubMed NCBI</div><div class="si-desc">+35 millions d'articles médicaux (2020-2024)</div><span class="si-free">Gratuit — sans clé</span></div></div>
+          <div class="si-item"><span class="si-ico">💊</span><div><div class="si-name">OpenFDA</div><div class="si-desc">Base FDA — interactions et contre-indications</div><span class="si-free">Gratuit — sans clé</span></div></div>
+          <div class="si-item"><span class="si-ico">🤖</span><div><div class="si-name">Gemini 1.5 Flash</div><div class="si-desc">Analyse et formulation de la suggestion clinique</div><span class="si-free">Clé API gratuite requise</span></div></div>
+        </div>
+      </div>
+
+    </div><!-- sw -->
+  </div><!-- app-body -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav">
+    <button class="bn on" id="bn-dash"><span class="bn-ico">🏠</span><span class="bn-lbl">الرئيسية</span></button>
+    <button class="bn" id="bn-new"><span class="bn-ico">➕</span><span class="bn-lbl">مريض جديد</span></button>
+    <button class="bn" id="bn-set"><span class="bn-ico">⚙️</span><span class="bn-lbl">الإعدادات</span></button>
+  </div>
+</div>
+
+<!-- DOSE MODAL -->
+<div class="modal-bg hidden" id="modal-bg">
+  <div class="modal-box">
+    <div class="modal-title" id="mod-title">Sertraline</div>
+    <div class="modal-sub" id="mod-class">ISRS</div>
+    <div class="dose-info" id="mod-info"></div>
+    <div style="font-size:12px;font-weight:700;color:var(--gray3);margin-bottom:7px">Choisir le dosage :</div>
+    <div class="dose-chips" id="mod-chips"></div>
+    <div class="dose-qty">
+      <label>Fréquence :</label>
+      <select id="mod-freq">
+        <option value="1 fois/j">1 fois/j</option>
+        <option value="2 fois/j">2 fois/j</option>
+        <option value="3 fois/j">3 fois/j</option>
+        <option value="au coucher">au coucher</option>
+        <option value="matin">le matin</option>
+        <option value="si besoin">si besoin</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="mcancel" id="mod-cancel">Annuler</button>
+      <button class="mok" id="mod-ok">✅ Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//   DRUG DATABASE — DCI Français — ~120 médicaments
+// ══════════════════════════════════════════════════════════════
+var DRUGS = [
+  // ── ISRS ──
+  {dci:"Fluoxétine",   cls:"ISRS",            doses:["10mg","20mg","40mg"],          di:"20mg/j",  dc:"20-40mg/j",  dm:"80mg",   ind:"Dépression, TOC, Boulimie"},
+  {dci:"Sertraline",   cls:"ISRS",            doses:["25mg","50mg","100mg"],         di:"50mg/j",  dc:"50-200mg/j", dm:"200mg",  ind:"Dépression, TOC, Anxiété, PTSD"},
+  {dci:"Paroxétine",   cls:"ISRS",            doses:["10mg","20mg","30mg","40mg"],   di:"20mg/j",  dc:"20-40mg/j",  dm:"60mg",   ind:"Dépression, Anxiété, TOC"},
+  {dci:"Escitalopram", cls:"ISRS",            doses:["5mg","10mg","20mg"],           di:"10mg/j",  dc:"10-20mg/j",  dm:"20mg",   ind:"Dépression, Anxiété généralisée"},
+  {dci:"Citalopram",   cls:"ISRS",            doses:["10mg","20mg","40mg"],          di:"20mg/j",  dc:"20-40mg/j",  dm:"40mg",   ind:"Dépression, Trouble panique"},
+  {dci:"Fluvoxamine",  cls:"ISRS",            doses:["50mg","100mg"],                di:"50mg/j",  dc:"100-300mg/j",dm:"300mg",  ind:"TOC, Dépression"},
+  // ── IRSN ──
+  {dci:"Venlafaxine",  cls:"IRSNa",           doses:["37.5mg","75mg","150mg"],       di:"37.5mg/j",dc:"75-225mg/j", dm:"375mg",  ind:"Dépression, Anxiété, Douleur neuropathique"},
+  {dci:"Duloxétine",   cls:"IRSNa",           doses:["30mg","60mg"],                 di:"30mg/j",  dc:"60-120mg/j", dm:"120mg",  ind:"Dépression, Anxiété, Douleur neuropathique"},
+  {dci:"Milnacipran",  cls:"IRSNa",           doses:["25mg","50mg","100mg"],         di:"25mg x2", dc:"50mg x2",    dm:"200mg",  ind:"Dépression, Fibromyalgie"},
+  {dci:"Desvenlafaxine",cls:"IRSNa",          doses:["50mg","100mg"],                di:"50mg/j",  dc:"50-100mg/j", dm:"400mg",  ind:"Dépression"},
+  // ── Tricycliques ──
+  {dci:"Amitriptyline",cls:"Tricyclique",     doses:["10mg","25mg","50mg","75mg"],   di:"25mg/j",  dc:"75-150mg/j", dm:"300mg",  ind:"Dépression, Douleur chronique, Migraine"},
+  {dci:"Clomipramine", cls:"Tricyclique",     doses:["10mg","25mg","50mg","75mg"],   di:"25mg/j",  dc:"100-150mg/j",dm:"250mg",  ind:"TOC, Dépression, Phobie"},
+  {dci:"Imipramine",   cls:"Tricyclique",     doses:["10mg","25mg","50mg"],          di:"25mg/j",  dc:"100-150mg/j",dm:"300mg",  ind:"Dépression, Énurésie"},
+  {dci:"Nortriptyline",cls:"Tricyclique",     doses:["10mg","25mg","50mg"],          di:"25mg/j",  dc:"75-100mg/j", dm:"150mg",  ind:"Dépression"},
+  {dci:"Dosulépine",   cls:"Tricyclique",     doses:["25mg","75mg"],                 di:"25mg/j",  dc:"75-150mg/j", dm:"225mg",  ind:"Dépression avec anxiété"},
+  // ── Autres antidépresseurs ──
+  {dci:"Mirtazapine",  cls:"NaSSA",           doses:["15mg","30mg","45mg"],          di:"15mg/j",  dc:"30-45mg/j",  dm:"45mg",   ind:"Dépression avec insomnie, Anorexie"},
+  {dci:"Bupropion",    cls:"NDRI",            doses:["75mg","150mg","300mg"],        di:"150mg/j", dc:"300-450mg/j",dm:"450mg",  ind:"Dépression, Sevrage tabagique"},
+  {dci:"Trazodone",    cls:"SARI",            doses:["50mg","100mg","150mg"],        di:"50mg/j",  dc:"150-400mg/j",dm:"600mg",  ind:"Dépression, Insomnie"},
+  {dci:"Agomélatine",  cls:"Mélatoninergique",doses:["25mg","50mg"],                 di:"25mg/j",  dc:"25-50mg/j",  dm:"50mg",   ind:"Dépression majeure"},
+  {dci:"Vortioxétine", cls:"SMS",             doses:["5mg","10mg","15mg","20mg"],    di:"10mg/j",  dc:"10-20mg/j",  dm:"20mg",   ind:"Dépression majeure"},
+  {dci:"Moclobémide",  cls:"IMAO-A",          doses:["150mg","300mg"],               di:"150mg x2",dc:"300-600mg/j",dm:"600mg",  ind:"Dépression, Phobie sociale"},
+  // ── Stabilisateurs humeur ──
+  {dci:"Lithium",             cls:"Stabilisateur",doses:["150mg","300mg","400mg"],      di:"300mg x2",dc:"Lithiémie 0.6-1.2",dm:"—",     ind:"Trouble bipolaire I/II, Prévention rechutes"},
+  {dci:"Acide valproïque",    cls:"Stabilisateur",doses:["200mg","500mg","1000mg"],     di:"500mg/j", dc:"Vallée 50-100mg/L",  dm:"60mg/kg",ind:"Bipolaire, Épilepsie, Migraine"},
+  {dci:"Divalproex sodique",  cls:"Stabilisateur",doses:["250mg","500mg"],              di:"500mg/j", dc:"750-2000mg/j",       dm:"60mg/kg",ind:"Manie aiguë, Bipolaire"},
+  {dci:"Carbamazépine",       cls:"Stabilisateur",doses:["100mg","200mg","400mg"],      di:"200mg x2",dc:"400-800mg/j",        dm:"1600mg", ind:"Bipolaire, Épilepsie, Névralgie"},
+  {dci:"Lamotrigine",         cls:"Stabilisateur",doses:["25mg","50mg","100mg","200mg"],di:"25mg/j",  dc:"100-200mg/j",        dm:"400mg",  ind:"Bipolaire II, Dépression bipolaire"},
+  {dci:"Oxcarbazépine",       cls:"Stabilisateur",doses:["150mg","300mg","600mg"],      di:"300mg x2",dc:"600-1200mg/j",       dm:"2400mg", ind:"Bipolaire, Épilepsie"},
+  {dci:"Topiramate",          cls:"Antiépileptique",doses:["25mg","50mg","100mg","200mg"],di:"25mg/j",dc:"100-200mg/j",        dm:"400mg",  ind:"Bipolaire, Migraine, Épilepsie"},
+  // ── Antipsychotiques typiques ──
+  {dci:"Halopéridol",    cls:"Antipsychotique typique",doses:["0.5mg","1mg","2mg","5mg","10mg"],di:"0.5-2mg/j",dc:"5-10mg/j",   dm:"100mg",  ind:"Schizophrénie, Manie, Délirium"},
+  {dci:"Chlorpromazine", cls:"Antipsychotique typique",doses:["25mg","50mg","100mg"],            di:"25mg/j",  dc:"200-600mg/j",dm:"1000mg", ind:"Schizophrénie, Manie"},
+  {dci:"Fluphénazine",   cls:"Antipsychotique typique",doses:["1mg","2.5mg","5mg"],              di:"1-2.5mg/j",dc:"2.5-10mg/j",dm:"20mg",   ind:"Schizophrénie chronique"},
+  {dci:"Sulpiride",      cls:"Antipsychotique typique",doses:["50mg","100mg","200mg"],           di:"50mg x2", dc:"400-800mg/j",dm:"1600mg", ind:"Schizophrénie, Dépression"},
+  {dci:"Tiapride",       cls:"Antipsychotique typique",doses:["100mg"],                          di:"100mg/j", dc:"300-600mg/j",dm:"1200mg", ind:"Agitation, Alcoolisme, Dyskinésies"},
+  {dci:"Perphénazine",   cls:"Antipsychotique typique",doses:["4mg","8mg"],                      di:"4mg x2",  dc:"8-24mg/j",   dm:"64mg",   ind:"Schizophrénie, Vomissements"},
+  // ── Antipsychotiques atypiques ──
+  {dci:"Olanzapine",   cls:"Antipsychotique atypique",doses:["2.5mg","5mg","7.5mg","10mg","15mg","20mg"],di:"5-10mg/j",dc:"10-20mg/j",dm:"20mg",   ind:"Schizophrénie, Bipolaire, Manie"},
+  {dci:"Rispéridone",  cls:"Antipsychotique atypique",doses:["0.5mg","1mg","2mg","3mg","4mg","6mg"],     di:"1-2mg/j", dc:"4-8mg/j",   dm:"16mg",   ind:"Schizophrénie, Bipolaire, Autisme"},
+  {dci:"Quétiapine",   cls:"Antipsychotique atypique",doses:["25mg","50mg","100mg","200mg","300mg"],     di:"25mg/j",  dc:"300-800mg/j",dm:"800mg",  ind:"Schizophrénie, Bipolaire, Dépression"},
+  {dci:"Clozapine",    cls:"Antipsychotique atypique",doses:["12.5mg","25mg","50mg","100mg","200mg"],    di:"12.5mg/j",dc:"200-450mg/j",dm:"900mg",  ind:"Schizophrénie résistante"},
+  {dci:"Aripiprazole", cls:"Antipsychotique atypique",doses:["5mg","10mg","15mg","20mg","30mg"],         di:"10-15mg/j",dc:"15mg/j",    dm:"30mg",   ind:"Schizophrénie, Bipolaire, Dépression"},
+  {dci:"Ziprasidone",  cls:"Antipsychotique atypique",doses:["20mg","40mg","60mg","80mg"],               di:"20mg x2", dc:"40-80mg x2",dm:"160mg",  ind:"Schizophrénie, Bipolaire"},
+  {dci:"Amisulpride",  cls:"Antipsychotique atypique",doses:["50mg","100mg","200mg","400mg"],            di:"50mg/j",  dc:"400-800mg/j",dm:"1200mg", ind:"Schizophrénie, Dysthymie"},
+  {dci:"Palipéridone", cls:"Antipsychotique atypique",doses:["3mg","6mg","9mg","12mg"],                  di:"6mg/j",   dc:"6-12mg/j",   dm:"12mg",   ind:"Schizophrénie"},
+  {dci:"Lurasidone",   cls:"Antipsychotique atypique",doses:["20mg","40mg","60mg","80mg","120mg"],       di:"40mg/j",  dc:"40-160mg/j", dm:"160mg",  ind:"Schizophrénie, Dépression bipolaire"},
+  {dci:"Brexpiprazole",cls:"Antipsychotique atypique",doses:["0.5mg","1mg","2mg","3mg","4mg"],           di:"1mg/j",   dc:"2-4mg/j",    dm:"4mg",    ind:"Schizophrénie, Dépression"},
+  // ── Anxiolytiques BZD ──
+  {dci:"Diazépam",     cls:"Benzodiazépine",doses:["2mg","5mg","10mg"],          di:"5mg/j",   dc:"5-30mg/j",   dm:"60mg",   ind:"Anxiété, Sevrage alcoolique, Spasmes"},
+  {dci:"Alprazolam",   cls:"Benzodiazépine",doses:["0.25mg","0.5mg","1mg"],      di:"0.25mg x3",dc:"0.5-1mg x3",dm:"4mg",   ind:"Trouble panique, Anxiété"},
+  {dci:"Clonazépam",   cls:"Benzodiazépine",doses:["0.5mg","1mg","2mg"],         di:"0.5mg x2",dc:"1-4mg/j",    dm:"20mg",   ind:"Trouble panique, Épilepsie, Bipolaire"},
+  {dci:"Lorazépam",    cls:"Benzodiazépine",doses:["0.5mg","1mg","2mg"],         di:"1mg x2",  dc:"2-4mg/j",    dm:"10mg",   ind:"Anxiété aiguë, Sevrage alcoolique"},
+  {dci:"Oxazépam",     cls:"Benzodiazépine",doses:["10mg","15mg","30mg"],        di:"10mg x3", dc:"30-120mg/j", dm:"120mg",  ind:"Anxiété, Sevrage alcoolique"},
+  {dci:"Bromazépam",   cls:"Benzodiazépine",doses:["1.5mg","3mg","6mg"],         di:"1.5mg x3",dc:"3-6mg x3",   dm:"60mg",   ind:"Anxiété"},
+  {dci:"Clorazépate",  cls:"Benzodiazépine",doses:["5mg","10mg","20mg"],         di:"5mg x3",  dc:"15-60mg/j",  dm:"90mg",   ind:"Anxiété, Sevrage alcoolique"},
+  {dci:"Prazépam",     cls:"Benzodiazépine",doses:["5mg","10mg"],                di:"10mg/j",  dc:"20-40mg/j",  dm:"60mg",   ind:"Anxiété généralisée"},
+  {dci:"Chlorazépate", cls:"Benzodiazépine",doses:["5mg","10mg"],                di:"10mg/j",  dc:"15-30mg/j",  dm:"60mg",   ind:"Anxiété"},
+  // ── Anxiolytiques non-BZD ──
+  {dci:"Buspirone",    cls:"Anxiolytique non-BZD",doses:["5mg","10mg"],          di:"5mg x3",  dc:"15-60mg/j",  dm:"60mg",   ind:"Anxiété généralisée (sans dépendance)"},
+  {dci:"Hydroxyzine",  cls:"Antihistaminique",    doses:["10mg","25mg","50mg","100mg"],di:"25mg/j",dc:"50-100mg/j",dm:"300mg",ind:"Anxiété, Prurit, Prémédication"},
+  {dci:"Prégabaline",  cls:"Gabapentinoïde",      doses:["25mg","50mg","75mg","100mg","150mg","200mg","300mg"],di:"75mg x2",dc:"150-600mg/j",dm:"600mg",ind:"Anxiété, Douleur neuropathique, Épilepsie"},
+  {dci:"Gabapentine",  cls:"Gabapentinoïde",      doses:["100mg","300mg","400mg","600mg","800mg"],di:"300mg x3",dc:"900-3600mg/j",dm:"3600mg",ind:"Épilepsie, Douleur neuropathique, Anxiété"},
+  // ── Hypnotiques ──
+  {dci:"Zolpidem",     cls:"Hypnotique Z",   doses:["5mg","10mg"],               di:"10mg",    dc:"10mg/j",     dm:"10mg",   ind:"Insomnie — courte durée (4 sem max)"},
+  {dci:"Zopiclone",    cls:"Hypnotique Z",   doses:["3.75mg","7.5mg"],           di:"7.5mg",   dc:"7.5mg/j",    dm:"7.5mg",  ind:"Insomnie — courte durée"},
+  {dci:"Eszopiclone",  cls:"Hypnotique Z",   doses:["1mg","2mg","3mg"],          di:"2mg",     dc:"2-3mg/j",    dm:"3mg",    ind:"Insomnie"},
+  {dci:"Mélatonine",   cls:"Mélatonine",     doses:["0.5mg","1mg","2mg","3mg","5mg"],di:"2mg",dc:"2-5mg/j",     dm:"10mg",   ind:"Insomnie, Décalage horaire, Bipolaire"},
+  // ── Alzheimer ──
+  {dci:"Donépézil",    cls:"Anticholinestérasique",doses:["5mg","10mg","23mg"],         di:"5mg/j",  dc:"10mg/j",     dm:"23mg",  ind:"Alzheimer léger à modéré/sévère"},
+  {dci:"Rivastigmine", cls:"Anticholinestérasique",doses:["1.5mg","3mg","4.5mg","6mg"], di:"1.5mg x2",dc:"3-6mg x2",  dm:"12mg",  ind:"Alzheimer, Démence à corps de Lewy"},
+  {dci:"Galantamine",  cls:"Anticholinestérasique",doses:["4mg","8mg","12mg"],           di:"4mg x2", dc:"8-12mg x2",  dm:"24mg",  ind:"Alzheimer léger à modéré"},
+  {dci:"Mémantine",    cls:"Antagoniste NMDA",     doses:["5mg","10mg","15mg","20mg"],   di:"5mg/j",  dc:"10-20mg/j",  dm:"20mg",  ind:"Alzheimer modéré à sévère"},
+  // ── Parkinson ──
+  {dci:"Lévodopa/Carbidopa",  cls:"Dopaminergique",doses:["100/25mg","250/25mg"],     di:"100mg x3",dc:"Titration",      dm:"Variable",ind:"Maladie de Parkinson"},
+  {dci:"Lévodopa/Bensérazide",cls:"Dopaminergique",doses:["100/25mg","200/50mg"],     di:"100mg x3",dc:"Titration",      dm:"Variable",ind:"Maladie de Parkinson"},
+  {dci:"Pramipexole",         cls:"Agoniste D2/D3", doses:["0.088mg","0.18mg","0.35mg","0.7mg","1.1mg"],di:"0.088mg x3",dc:"0.5-1.1mg x3",dm:"3.3mg",ind:"Parkinson, Jambes sans repos"},
+  {dci:"Ropinirole",          cls:"Agoniste D2/D3", doses:["0.25mg","0.5mg","1mg","2mg","4mg","5mg"],di:"0.25mg x3",dc:"2-4mg x3",dm:"24mg",   ind:"Parkinson, Jambes sans repos"},
+  {dci:"Rasagiline",          cls:"IMAO-B",          doses:["0.5mg","1mg"],             di:"1mg/j",   dc:"1mg/j",        dm:"1mg",     ind:"Parkinson — monothérapie ou adjuvant"},
+  {dci:"Sélégiline",          cls:"IMAO-B",          doses:["5mg","10mg"],              di:"5mg x2",  dc:"10mg/j",       dm:"10mg",    ind:"Parkinson"},
+  {dci:"Amantadine",          cls:"Antiparkinsonien",doses:["100mg"],                   di:"100mg x2",dc:"100-300mg/j",  dm:"400mg",   ind:"Parkinson, Dyskinésies, Grippe"},
+  {dci:"Bipéridène",          cls:"Anticholinergique",doses:["1mg","2mg"],              di:"1mg x2",  dc:"2-4mg x2",     dm:"16mg",    ind:"Effets EPS des antipsychotiques"},
+  {dci:"Trihexyphénidyle",    cls:"Anticholinergique",doses:["2mg","5mg"],              di:"1mg/j",   dc:"6-10mg/j",     dm:"15mg",    ind:"Parkinsonisme iatrogène, Dystonie"},
+  // ── Addiction / Sevrage ──
+  {dci:"Naltrexone",   cls:"Antagoniste opioïde",doses:["25mg","50mg"],                 di:"25mg/j",  dc:"50mg/j",       dm:"50mg",   ind:"Alcoolisme, Opiacés — prévention rechute"},
+  {dci:"Naloxone",     cls:"Antagoniste opioïde",doses:["0.4mg","0.8mg","2mg"],         di:"0.4mg IV",dc:"Urgence",       dm:"—",      ind:"Surdosage opiacés (urgence)"},
+  {dci:"Buprénorphine",cls:"Agoniste partiel opioïde",doses:["0.4mg","2mg","4mg","8mg","16mg"],di:"4-8mg/j",dc:"8-24mg/j",dm:"32mg",ind:"Dépendance aux opiacés"},
+  {dci:"Méthadone",    cls:"Agoniste opioïde",  doses:["5mg","10mg","20mg","40mg"],     di:"20-30mg/j",dc:"Titration",    dm:"Variable",ind:"Traitement de substitution opiacés"},
+  {dci:"Acamprosate",  cls:"Anti-craving alcool",doses:["333mg"],                       di:"333mg x3",dc:"1998mg/j",      dm:"1998mg", ind:"Maintien abstinence alcool"},
+  {dci:"Disulfirame",  cls:"Antabuse",          doses:["250mg","500mg"],                di:"500mg/j", dc:"250mg/j",       dm:"500mg",  ind:"Dissuasion alcoolisme"},
+  {dci:"Varénicline",  cls:"Agoniste nAChR",    doses:["0.5mg","1mg"],                  di:"0.5mg/j", dc:"1mg x2",        dm:"2mg",    ind:"Sevrage tabagique"},
+  // ── TDAH ──
+  {dci:"Méthylphénidate",cls:"Stimulant CNS",  doses:["5mg","10mg","20mg","30mg","36mg","54mg"],di:"5mg x2",dc:"20-60mg/j",dm:"60mg",ind:"TDAH enfant/adulte"},
+  {dci:"Atomoxétine",  cls:"ISRN",             doses:["10mg","18mg","25mg","40mg","60mg","80mg"],di:"0.5mg/kg",dc:"1.2mg/kg",dm:"100mg",ind:"TDAH"},
+  // ── Antiépileptiques ──
+  {dci:"Lévétiracétam",cls:"Antiépileptique", doses:["250mg","500mg","750mg","1000mg"],  di:"500mg x2",dc:"1000-3000mg/j",dm:"3000mg",ind:"Épilepsie, Prévention convulsions"},
+  {dci:"Phénobarbital", cls:"Barbiturique",   doses:["15mg","50mg","100mg"],             di:"50mg/j",  dc:"60-180mg/j",   dm:"600mg",  ind:"Épilepsie, Sevrage alcoolique"},
+  {dci:"Phénytoïne",    cls:"Antiépileptique",doses:["50mg","100mg"],                    di:"100mg x3",dc:"Phénytoinémie",  dm:"600mg",  ind:"Épilepsie tonico-clonique"},
+  {dci:"Zonisamide",    cls:"Antiépileptique",doses:["25mg","50mg","100mg"],             di:"50mg/j",  dc:"100-500mg/j",   dm:"600mg",  ind:"Épilepsie, Parkinson (adjuvant)"},
+  // ── Autres ──
+  {dci:"Propranolol",   cls:"Bêta-bloquant",  doses:["10mg","40mg","80mg"],             di:"10mg/j",  dc:"40-120mg/j",   dm:"320mg",  ind:"Anxiété situationnelle, Tremblements, Migraine"},
+  {dci:"Clonidine",     cls:"Alpha-2 agoniste",doses:["0.1mg","0.2mg","0.3mg"],         di:"0.1mg x2",dc:"0.2-0.6mg/j",  dm:"2.4mg",  ind:"Sevrage opiacés, TDAH, HTA"},
+  {dci:"Piracétam",     cls:"Nootrope",        doses:["400mg","800mg","1200mg"],         di:"800mg x3",dc:"2400-4800mg/j",dm:"24g",    ind:"Troubles cognitifs, Myoclonies"},
+  {dci:"Bêtahistine",   cls:"Antivertigineux", doses:["8mg","16mg","24mg"],              di:"8mg x3",  dc:"16mg x3",      dm:"48mg",   ind:"Vertiges, Maladie de Ménière"},
+];
+
+// ══════════════════════════════════════════════════════════════
+//   INDEXEDDB — Stockage fiable sur Android
+// ══════════════════════════════════════════════════════════════
+var DB = null;
+var DB_NAME = 'rxai_db';
+var DB_VER = 1;
+
+function initDB(cb) {
+  var req = indexedDB.open(DB_NAME, DB_VER);
+  req.onupgradeneeded = function(e) {
+    var db = e.target.result;
+    if (!db.objectStoreNames.contains('patients')) {
+      db.createObjectStore('patients', {keyPath:'id', autoIncrement:true});
+    }
+    if (!db.objectStoreNames.contains('config')) {
+      db.createObjectStore('config', {keyPath:'key'});
+    }
+  };
+  req.onsuccess = function(e) {
+    DB = e.target.result;
+    cb && cb();
+  };
+  req.onerror = function() {
+    // fallback to localStorage if IndexedDB fails
+    DB = null;
+    cb && cb();
+  };
+}
+
+function dbSaveConfig(key, val, cb) {
+  if (!DB) { try { localStorage.setItem('rxai_cfg_'+key, JSON.stringify(val)); } catch(e){} cb && cb(); return; }
+  var tx = DB.transaction('config', 'readwrite');
+  tx.objectStore('config').put({key:key, val:val});
+  tx.oncomplete = function() { cb && cb(); };
+}
+
+function dbGetConfig(key, def, cb) {
+  if (!DB) {
+    try { var v = localStorage.getItem('rxai_cfg_'+key); cb(v ? JSON.parse(v) : def); } catch(e){ cb(def); }
+    return;
+  }
+  var req = DB.transaction('config','readonly').objectStore('config').get(key);
+  req.onsuccess = function(e) { cb(e.target.result ? e.target.result.val : def); };
+  req.onerror = function() { cb(def); };
+}
+
+function dbSavePatient(pt, cb) {
+  if (!DB) {
+    try {
+      var pts = JSON.parse(localStorage.getItem('rxai_pts')||'[]');
+      var idx = pts.findIndex(function(p){return p.id===pt.id;});
+      if (idx>=0) pts[idx]=pt; else pts.push(pt);
+      localStorage.setItem('rxai_pts', JSON.stringify(pts));
+    } catch(e){}
+    cb && cb(pt);
+    return;
+  }
+  var tx = DB.transaction('patients','readwrite');
+  var store = tx.objectStore('patients');
+  var req = pt.id ? store.put(pt) : store.add(pt);
+  req.onsuccess = function(e) { pt.id = e.target.result; cb && cb(pt); };
+  req.onerror = function() { cb && cb(null); };
+}
+
+function dbGetAllPatients(cb) {
+  if (!DB) {
+    try { cb(JSON.parse(localStorage.getItem('rxai_pts')||'[]')); } catch(e){ cb([]); }
+    return;
+  }
+  var req = DB.transaction('patients','readonly').objectStore('patients').getAll();
+  req.onsuccess = function(e) { cb(e.target.result || []); };
+  req.onerror = function() { cb([]); };
+}
+
+// ══════════════════════════════════════════════════════════════
+//   APP STATE
+// ══════════════════════════════════════════════════════════════
+var DOC   = {name:'', spec:'', key:''};
+var STATS = {today:0, ai:0};
+var ALL_PTS = [];
+var CUR_PT  = null;
+var AI_RES  = '';
+var ZOOM    = 100;
+var CUR_DRUGS_NEW = []; // current meds in new patient form
+var CUR_DRUGS_RX  = []; // drugs added to prescription
+var MODAL_CB = null;    // modal callback
+var MODAL_DRUG = null;  // selected drug object
+var MODAL_DOSE = null;  // selected dose
+
+// ══════════════════════════════════════════════════════════════
+//   UTILS
+// ══════════════════════════════════════════════════════════════
+function el(id){ return document.getElementById(id); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+var _tt;
+function toast(msg, type) {
+  clearTimeout(_tt);
+  var t = el('toast');
+  t.textContent = msg;
+  t.className = 'toast on' + (type==='err'?' err':'');
+  _tt = setTimeout(function(){ t.className='toast'; }, 3500);
+}
+
+// ══════════════════════════════════════════════════════════════
+//   ZOOM
+// ══════════════════════════════════════════════════════════════
+function applyZoom() {
+  var s = el('sw');
+  var p = ZOOM/100;
+  s.style.transform = 'scale('+p+')';
+  s.style.width = (10000/ZOOM)+'%';
+  el('zl').textContent = ZOOM+'%';
+}
+el('zm').addEventListener('click', function(){ ZOOM=Math.max(50,ZOOM-10); applyZoom(); });
+el('zp').addEventListener('click', function(){ ZOOM=Math.min(150,ZOOM+10); applyZoom(); });
+el('zr0').addEventListener('click', function(){ ZOOM=100; applyZoom(); });
+
+// ══════════════════════════════════════════════════════════════
+//   NAVIGATION
+// ══════════════════════════════════════════════════════════════
+var VIDS = ['dash','new','ai','rx','set'];
+var NMAP = {dash:'bn-dash','new':'bn-new',ai:'bn-new',rx:'bn-new',set:'bn-set'};
+
+function gotoV(name) {
+  VIDS.forEach(function(v){ var e=el('v-'+v); if(e) e.classList.remove('on'); });
+  ['bn-dash','bn-new','bn-set'].forEach(function(n){ var e=el(n); if(e) e.classList.remove('on'); });
+  var t = el('v-'+name);
+  if(t) t.classList.add('on');
+  var nb = el(NMAP[name]||'bn-dash');
+  if(nb) nb.classList.add('on');
+  el('app-body').scrollTop = 0;
+  if(name==='dash') renderDash();
+  if(name==='new')  clearNewForm();
+  if(name==='set')  loadSet();
+}
+
+// ══════════════════════════════════════════════════════════════
+//   DRUG AUTOCOMPLETE
+// ══════════════════════════════════════════════════════════════
+function setupDrugInput(inputId, dropdownId, listId, drugArr, isRx) {
+  var inp = el(inputId);
+  var dd  = el(dropdownId);
+  var lst = el(listId);
+
+  inp.addEventListener('input', function() {
+    var q = inp.value.trim().toLowerCase();
+    if (!q) { dd.style.display='none'; return; }
+    var matches = DRUGS.filter(function(d){ return d.dci.toLowerCase().indexOf(q)===0; }).slice(0,8);
+    if (!matches.length) { dd.style.display='none'; return; }
+    dd.innerHTML = matches.map(function(d) {
+      var dosesHtml = d.doses.map(function(dose){
+        return '<span class="di-dose" data-dci="'+esc(d.dci)+'" data-dose="'+esc(dose)+'">'+esc(dose)+'</span>';
+      }).join('');
+      return '<div class="drug-item">'
+        +'<div class="di-name">'+esc(d.dci)+'</div>'
+        +'<div class="di-class">'+esc(d.cls)+' — '+esc(d.ind)+'</div>'
+        +'<div class="di-doses">'+dosesHtml+'</div>'
+        +'</div>';
+    }).join('');
+    dd.style.display = 'block';
+
+    // click on dose chip → open modal
+    dd.querySelectorAll('.di-dose').forEach(function(chip) {
+      chip.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var dciName = chip.getAttribute('data-dci');
+        var drug = DRUGS.find(function(d){ return d.dci===dciName; });
+        if (!drug) return;
+        inp.value = '';
+        dd.style.display = 'none';
+        openModal(drug, chip.getAttribute('data-dose'), function(result) {
+          addDrugToList(result, drugArr, lst, isRx);
+        });
+      });
+    });
+
+    // click on drug name → open modal with first dose
+    dd.querySelectorAll('.drug-item').forEach(function(item, idx) {
+      item.addEventListener('click', function(e) {
+        if (e.target.classList.contains('di-dose')) return;
+        var drug = matches[idx];
+        inp.value = '';
+        dd.style.display = 'none';
+        openModal(drug, drug.doses[0], function(result) {
+          addDrugToList(result, drugArr, lst, isRx);
+        });
+      });
+    });
+  });
+
+  // add button
+  var addBtn = el(inputId.replace('input','add').replace('drug-','drug-').replace('-input','-add'));
+  if (addBtn) {
+    addBtn.addEventListener('click', function() {
+      var q = inp.value.trim();
+      if (!q) return;
+      var drug = DRUGS.find(function(d){ return d.dci.toLowerCase()===q.toLowerCase(); });
+      if (drug) {
+        openModal(drug, drug.doses[0], function(result) {
+          addDrugToList(result, drugArr, lst, isRx);
+          inp.value = '';
+          dd.style.display = 'none';
+        });
+      } else {
+        // free text
+        addDrugToList({label:q, dose:'', freq:''}, drugArr, lst, isRx);
+        inp.value = '';
+        dd.style.display = 'none';
+      }
+    });
+  }
+
+  // close dropdown on outside click
+  document.addEventListener('click', function(e) {
+    if (!el(dropdownId.replace('dd-','dw-')) || !el(dropdownId.replace('dd-','dw-')).contains(e.target)) {
+      dd.style.display = 'none';
+    }
+  });
+}
+
+function addDrugToList(result, arr, listEl, isRx) {
+  arr.push(result);
+  renderDrugList(arr, listEl, isRx);
+  if (isRx) updateRxFromDrugs();
+}
+
+function renderDrugList(arr, listEl, isRx) {
+  if (!arr.length) { listEl.innerHTML = ''; return; }
+  listEl.innerHTML = arr.map(function(d, i) {
+    var label = d.label || d.dci || '';
+    var doseStr = [d.dose, d.freq].filter(Boolean).join(' — ');
+    return '<div class="drug-card">'
+      +'<div class="dc-info">'
+      +'<div class="dc-name">'+esc(label)+'</div>'
+      +(doseStr?'<div class="dc-dose">'+esc(doseStr)+'</div>':'')
+      +'</div>'
+      +'<button class="dc-del" data-idx="'+i+'" data-rx="'+(isRx?'1':'0')+'">✕</button>'
+      +'</div>';
+  }).join('');
+  listEl.querySelectorAll('.dc-del').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = parseInt(btn.getAttribute('data-idx'));
+      arr.splice(idx, 1);
+      renderDrugList(arr, listEl, btn.getAttribute('data-rx')==='1');
+      if (btn.getAttribute('data-rx')==='1') updateRxFromDrugs();
+    });
+  });
+}
+
+function updateRxFromDrugs() {
+  var txt = CUR_DRUGS_RX.map(function(d, i) {
+    var line = (i+1)+'. '+(d.label||d.dci||'');
+    if (d.dose) line += '  '+d.dose;
+    if (d.freq) line += '  — '+d.freq;
+    return line;
+  }).join('\n');
+  var area = el('rx-drugs');
+  if (area) area.value = txt;
+}
+
+// ══════════════════════════════════════════════════════════════
+//   MODAL — Dose selector
+// ══════════════════════════════════════════════════════════════
+function openModal(drug, defaultDose, cb) {
+  MODAL_DRUG = drug;
+  MODAL_DOSE = defaultDose || drug.doses[0];
+  MODAL_CB   = cb;
+
+  el('mod-title').textContent = drug.dci;
+  el('mod-class').textContent = drug.cls + ' — ' + drug.ind;
+  el('mod-info').innerHTML =
+    '<strong>Dose initiale :</strong> '+esc(drug.di)+'<br>'
+    +'<strong>Dose cible :</strong> '+esc(drug.dc)+'<br>'
+    +'<strong>Dose max :</strong> '+esc(drug.dm);
+
+  el('mod-chips').innerHTML = drug.doses.map(function(d) {
+    return '<span class="dose-chip'+(d===MODAL_DOSE?' sel':'')+'" data-dose="'+esc(d)+'">'+esc(d)+'</span>';
+  }).join('');
+
+  el('mod-chips').querySelectorAll('.dose-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      MODAL_DOSE = chip.getAttribute('data-dose');
+      el('mod-chips').querySelectorAll('.dose-chip').forEach(function(c){ c.classList.remove('sel'); });
+      chip.classList.add('sel');
+    });
+  });
+
+  el('modal-bg').classList.remove('hidden');
+}
+
+el('mod-cancel').addEventListener('click', function() {
+  el('modal-bg').classList.add('hidden');
+  MODAL_CB = null;
+});
+
+el('mod-ok').addEventListener('click', function() {
+  if (!MODAL_CB) return;
+  MODAL_CB({
+    label: MODAL_DRUG.dci,
+    dci: MODAL_DRUG.dci,
+    cls: MODAL_DRUG.cls,
+    dose: MODAL_DOSE,
+    freq: el('mod-freq').value
+  });
+  el('modal-bg').classList.add('hidden');
+  MODAL_CB = null;
+});
+
+// ══════════════════════════════════════════════════════════════
+//   LOGIN
+// ══════════════════════════════════════════════════════════════
+el('login-btn').addEventListener('click', doLogin);
+el('i-key').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+function doLogin() {
+  var name = el('i-name').value.trim();
+  var spec = el('i-spec').value.trim();
+  var key  = el('i-key').value.trim();
+  if (!name) { toast('⚠️ أدخل اسم الطبيب','err'); return; }
+  if (!key)  { toast('⚠️ أدخل مفتاح Gemini API','err'); return; }
+  DOC = {name:name, spec:spec, key:key};
+  dbSaveConfig('doc', DOC);
+  applyDocUI();
+  el('s-login').classList.remove('on');
+  el('s-app').classList.add('on');
+  loadPatientsAndRender();
+}
+
+el('logout-btn').addEventListener('click', function() {
+  el('s-app').classList.remove('on');
+  el('s-login').classList.add('on');
+});
+
+function applyDocUI() {
+  el('nav-nm').textContent = DOC.name;
+  el('nav-av').textContent = DOC.name.replace(/Dr\.?\s*/i,'').charAt(0).toUpperCase() || 'A';
+  el('rx-dn').textContent  = DOC.name;
+  el('rx-ds').textContent  = DOC.spec;
+}
+
+// ══════════════════════════════════════════════════════════════
+//   DASHBOARD
+// ══════════════════════════════════════════════════════════════
+function loadPatientsAndRender() {
+  dbGetAllPatients(function(pts) {
+    ALL_PTS = pts || [];
+    renderDash();
+  });
+}
+
+function renderDash() {
+  el('st-tot').textContent = ALL_PTS.length;
+  el('st-tod').textContent = STATS.today;
+  el('st-ai').textContent  = STATS.ai;
+  var q = (el('pt-search').value||'').toLowerCase();
+  var list = q ? ALL_PTS.filter(function(p){
+    return (p.name||'').toLowerCase().indexOf(q)>=0 || (p.diag||'').toLowerCase().indexOf(q)>=0;
+  }) : ALL_PTS;
+  var listEl = el('pt-list');
+  if (!list.length) {
+    listEl.innerHTML = '<div class="empty-box"><div class="empty-ico">📋</div><div>'+(q?'لا نتائج':'لا يوجد مرضى — اضغط "مريض جديد"')+'</div></div>';
+    return;
+  }
+  var html = '';
+  list.slice().reverse().forEach(function(p) {
+    html += '<div class="pt-row" data-id="'+p.id+'">'
+      +'<div><div class="pt-name">'+esc(p.name)+'</div><div class="pt-meta">'+esc(p.age)+' ans · '+esc(p.job||'—')+'</div></div>'
+      +'<div><span class="pt-diag">'+esc(p.diag)+'</span><div class="pt-date">'+esc(p.date)+'</div></div>'
+      +'</div>';
+  });
+  listEl.innerHTML = html;
+  listEl.querySelectorAll('.pt-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      var id = parseInt(row.getAttribute('data-id'));
+      var pt = ALL_PTS.find(function(p){ return p.id===id; });
+      if (pt) loadPatientToForm(pt);
+    });
+  });
+}
+
+el('pt-search').addEventListener('input', renderDash);
+
+// ══════════════════════════════════════════════════════════════
+//   NEW PATIENT FORM
+// ══════════════════════════════════════════════════════════════
+function clearNewForm() {
+  ['p-name','p-age','p-job','p-chr','p-sym','p-diag','p-dur','p-note'].forEach(function(id){
+    var e=el(id); if(e) e.value='';
+  });
+  el('p-sex').value='m';
+  el('p-sev').value='moderate';
+  el('drug-cur-input').value='';
+  el('dd-cur').style.display='none';
+  CUR_DRUGS_NEW = [];
+  renderDrugList(CUR_DRUGS_NEW, el('dl-cur'), false);
+  CUR_PT  = null;
+  AI_RES  = '';
+  el('new-title').textContent = 'ملف مريض جديد';
+  el('ai-res').style.display='none';
+  el('ai-src').style.display='none';
+  el('ai-step').textContent='';
+  el('ai-btn').disabled=false;
+}
+
+function loadPatientToForm(pt) {
+  CUR_PT = pt;
+  el('new-title').textContent = 'تعديل: '+pt.name;
+  el('p-name').value  = pt.name  || '';
+  el('p-age').value   = pt.age   || '';
+  el('p-sex').value   = pt.sex   || 'm';
+  el('p-job').value   = pt.job   || '';
+  el('p-chr').value   = pt.chr   || '';
+  el('p-sym').value   = pt.sym   || '';
+  el('p-diag').value  = pt.diag  || '';
+  el('p-sev').value   = pt.sev   || 'moderate';
+  el('p-dur').value   = pt.dur   || '';
+  el('p-note').value  = pt.note  || '';
+  CUR_DRUGS_NEW = pt.drugs || [];
+  renderDrugList(CUR_DRUGS_NEW, el('dl-cur'), false);
+  AI_RES = '';
+  VIDS.forEach(function(v){var e=el('v-'+v);if(e)e.classList.remove('on');});
+  ['bn-dash','bn-new','bn-set'].forEach(function(n){var e=el(n);if(e)e.classList.remove('on');});
+  el('v-new').classList.add('on');
+  el('bn-new').classList.add('on');
+  el('app-body').scrollTop=0;
+}
+
+function collectFormPT() {
+  return {
+    id:    CUR_PT ? CUR_PT.id : undefined,
+    name:  el('p-name').value.trim(),
+    age:   el('p-age').value,
+    sex:   el('p-sex').value,
+    job:   el('p-job').value.trim(),
+    chr:   el('p-chr').value.trim(),
+    drugs: CUR_DRUGS_NEW.slice(),
+    sym:   el('p-sym').value.trim(),
+    diag:  el('p-diag').value.trim(),
+    sev:   el('p-sev').value,
+    dur:   el('p-dur').value.trim(),
+    note:  el('p-note').value.trim(),
+    date:  new Date().toLocaleDateString('fr-DZ'),
+    rx:    ''
+  };
+}
+
+el('btn-back-dash').addEventListener('click', function(){ gotoV('dash'); });
+
+el('btn-save-pt').addEventListener('click', function() {
+  var pt = collectFormPT();
+  if (!pt.name) { toast('⚠️ أدخل اسم المريض','err'); return; }
+  if (!pt.diag) { toast('⚠️ أدخل التشخيص','err'); return; }
+  dbSavePatient(pt, function(saved) {
+    if (!saved) { toast('❌ خطأ في الحفظ','err'); return; }
+    CUR_PT = saved;
+    var idx = ALL_PTS.findIndex(function(p){ return p.id===saved.id; });
+    if (idx>=0) ALL_PTS[idx]=saved; else ALL_PTS.push(saved);
+    toast('✅ تم حفظ المريض','ok');
+  });
+});
+
+el('btn-go-ai').addEventListener('click', function() {
+  var name = el('p-name').value.trim();
+  var sym  = el('p-sym').value.trim();
+  var diag = el('p-diag').value.trim();
+  if (!name) { toast('⚠️ أدخل اسم المريض','err'); return; }
+  if (!sym)  { toast('⚠️ أدخل الأعراض','err'); return; }
+  if (!diag) { toast('⚠️ أدخل التشخيص','err'); return; }
+  CUR_PT = collectFormPT();
+  var sm = {mild:'légère',moderate:'modérée',severe:'sévère'};
+  el('ai-sum').textContent = CUR_PT.name+' · '+CUR_PT.age+' ans · '+(CUR_PT.sex==='m'?'M':'F')+' · '+diag+' · '+(sm[CUR_PT.sev]||'');
+  el('ai-res').style.display='none';
+  el('ai-src').style.display='none';
+  el('ai-step').textContent='';
+  el('ai-btn').disabled=false;
+  VIDS.forEach(function(v){var e=el('v-'+v);if(e)e.classList.remove('on');});
+  ['bn-dash','bn-new','bn-set'].forEach(function(n){var e=el(n);if(e)e.classList.remove('on');});
+  el('v-ai').classList.add('on');
+  el('bn-new').classList.add('on');
+  el('app-body').scrollTop=0;
+});
+
+// ══════════════════════════════════════════════════════════════
+//   PUBMED
+// ══════════════════════════════════════════════════════════════
+function searchPubMed(query, max, cb) {
+  max = max || 5;
+  var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term='
+    +encodeURIComponent(query)+'&retmax='+max+'&sort=date&retmode=json&datetype=pdat&mindate=2020&maxdate=2025';
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.timeout = 8000;
+  xhr.onload = function() {
+    try {
+      var d = JSON.parse(xhr.responseText);
+      var ids = d.esearchresult && d.esearchresult.idlist ? d.esearchresult.idlist : [];
+      if (!ids.length) { cb([]); return; }
+      var url2 = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id='+ids.join(',')+'&retmode=json';
+      var xhr2 = new XMLHttpRequest();
+      xhr2.open('GET', url2, true);
+      xhr2.timeout = 8000;
+      xhr2.onload = function() {
+        try {
+          var d2 = JSON.parse(xhr2.responseText);
+          var res = d2.result || {};
+          var articles = ids.map(function(id) {
+            var a = res[id] || {};
+            return {title:a.title||'',authors:(a.authors||[]).slice(0,2).map(function(x){return x.name;}).join(', '),journal:a.source||'',year:(a.pubdate||'').substring(0,4),pmid:id};
+          }).filter(function(a){ return a.title; });
+          cb(articles);
+        } catch(e){ cb([]); }
+      };
+      xhr2.onerror = xhr2.ontimeout = function(){ cb([]); };
+      xhr2.send();
+    } catch(e){ cb([]); }
+  };
+  xhr.onerror = xhr.ontimeout = function(){ cb([]); };
+  xhr.send();
+}
+
+// ══════════════════════════════════════════════════════════════
+//   OPENFDA
+// ══════════════════════════════════════════════════════════════
+function searchFDA(drug, cb) {
+  var url = 'https://api.fda.gov/drug/label.json?search=openfda.generic_name:"'+encodeURIComponent(drug)+'"&limit=1';
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.timeout = 7000;
+  xhr.onload = function() {
+    try {
+      var d = JSON.parse(xhr.responseText);
+      var r = d.results && d.results[0] ? d.results[0] : {};
+      cb({
+        interactions:(r.drug_interactions||[''])[0].substring(0,300),
+        contra:(r.contraindications||[''])[0].substring(0,300)
+      });
+    } catch(e){ cb(null); }
+  };
+  xhr.onerror = xhr.ontimeout = function(){ cb(null); };
+  xhr.send();
+}
+
+// ══════════════════════════════════════════════════════════════
+//   GEMINI — XMLHttpRequest (more compatible with Android WebView)
+// ══════════════════════════════════════════════════════════════
+el('ai-btn').addEventListener('click', runGemini);
+el('btn-regen').addEventListener('click', runGemini);
+
+function runGemini() {
+  if (!DOC.key) { toast('⚠️ مفتاح Gemini API مفقود','err'); return; }
+  if (!CUR_PT)  { toast('⚠️ لا توجد بيانات مريض','err'); return; }
+  var btn = el('ai-btn');
+  btn.disabled = true;
+  el('ai-res').style.display='none';
+  el('ai-src').style.display='none';
+
+  STATS.ai++;
+  dbSaveConfig('stats', STATS);
+  el('st-ai').textContent = STATS.ai;
+
+  var step = el('ai-step');
+
+  // Step 1: PubMed
+  step.innerHTML = '<span class="spin"></span> 🔍 Recherche PubMed...';
+  var q1 = CUR_PT.diag+' pharmacotherapy treatment 2022 2023 2024';
+  searchPubMed(q1, 5, function(pm1) {
+    var q2 = CUR_PT.diag+' '+CUR_PT.sev+' severity medication RCT';
+    searchPubMed(q2, 3, function(pm2) {
+
+      // Step 2: OpenFDA
+      step.innerHTML = '<span class="spin"></span> 💊 Vérification OpenFDA...';
+      var meds = CUR_PT.drugs && CUR_PT.drugs.length ? CUR_PT.drugs[0].dci : (CUR_PT.drugs_text||'');
+      var firstDrug = meds ? meds.split(/[,\s]/)[0] : '';
+
+      function buildAndSend(fdaData) {
+        // Build context
+        var ctx = '';
+        if (pm1.length) {
+          ctx += '\n📚 ÉTUDES PUBMED — '+CUR_PT.diag+':\n';
+          pm1.forEach(function(a,i){ ctx+=(i+1)+'. '+a.title+'\n   '+a.authors+' ('+a.year+') — '+a.journal+' [PMID:'+a.pmid+']\n'; });
+        }
+        if (pm2.length) {
+          ctx += '\n📚 ÉTUDES SÉVÉRITÉ ('+CUR_PT.sev+'):\n';
+          pm2.forEach(function(a,i){ ctx+=(i+1)+'. '+a.title+' ('+a.year+') [PMID:'+a.pmid+']\n'; });
+        }
+        if (fdaData) {
+          ctx += '\n🔴 OPENFDA — '+firstDrug+':\n';
+          ctx += '• Interactions: '+(fdaData.interactions||'Non disponible')+'\n';
+          ctx += '• Contre-indications: '+(fdaData.contra||'Non disponible')+'\n';
+        }
+
+        var sm = {mild:'légère',moderate:'modérée',severe:'sévère'};
+        var curMedsStr = CUR_PT.drugs && CUR_PT.drugs.length
+          ? CUR_PT.drugs.map(function(d){ return d.dci+(d.dose?' '+d.dose:'')+(d.freq?' — '+d.freq:''); }).join(', ')
+          : 'Aucun';
+
+        var prompt = 'Tu es un expert en psychopharmacologie clinique. Analyse les données réelles ci-dessous et formule une suggestion pharmacologique précise.\n\n'
+          +'PATIENT:\n'
+          +'• Nom: '+CUR_PT.name+'\n'
+          +'• Âge: '+CUR_PT.age+' ans, '+(CUR_PT.sex==='m'?'M':'F')+'\n'
+          +'• Profession: '+(CUR_PT.job||'—')+'\n'
+          +'• Antécédents: '+(CUR_PT.chr||'aucun')+'\n'
+          +'• Médicaments actuels: '+curMedsStr+'\n'
+          +'• Symptômes: '+CUR_PT.sym+'\n'
+          +'• Diagnostic: '+CUR_PT.diag+'\n'
+          +'• Sévérité: '+(sm[CUR_PT.sev]||CUR_PT.sev)+'\n'
+          +'• Durée: '+(CUR_PT.dur||'—')+'\n'
+          +'• Notes cliniques: '+(CUR_PT.note||'—')+'\n\n'
+          +'DONNÉES EN TEMPS RÉEL:\n'+(ctx||'Utiliser guidelines standards (HAS, APA, NICE, WFSBP)')+'\n\n'
+          +'CONSIGNE: Propose une suggestion pharmacologique evidence-based en te basant sur les données PubMed et FDA ci-dessus.\n\n'
+          +'FORMAT OBLIGATOIRE:\n'
+          +'═══════════════════════════════\n'
+          +'📊 ANALYSE CLINIQUE\n[Résumé clinique 2-3 lignes]\n\n'
+          +'💊 SUGGESTION PRINCIPALE\n'
+          +'Médicament: [DCI]\n'
+          +'• Classe: ...\n'
+          +'• Dose initiale: ...\n'
+          +'• Dose cible: ...\n'
+          +'• Durée minimale: ...\n'
+          +'• Niveau de preuve: [A/B/C]\n'
+          +'• Justification: [citer PMIDs si disponibles]\n\n'
+          +'⚠️ CONTRE-INDICATIONS & INTERACTIONS\n'
+          +'• [selon profil + données FDA]\n\n'
+          +'🔄 ALTERNATIVES THÉRAPEUTIQUES\n'
+          +'• Option 2: [DCI + dose + justification]\n'
+          +'• Option 3: [DCI + dose + justification]\n\n'
+          +'📚 RÉFÉRENCES UTILISÉES\n'
+          +'• [PMIDs des études PubMed citées]\n\n'
+          +'🩺 PLAN DE SUIVI\n'
+          +'• Réévaluation: [délai]\n'
+          +'• Bilan biologique: [si nécessaire]\n'
+          +'• Critères d\'efficacité: ...\n'
+          +'═══════════════════════════════\n'
+          +'⚠️ RAPPEL LÉGAL: Suggestions consultatives uniquement. Décision thérapeutique finale = médecin traitant qualifié.';
+
+        step.innerHTML = '<span class="spin"></span> 🤖 Gemini analyse et formule...';
+
+        var xhr = new XMLHttpRequest();
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+DOC.key;
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.timeout = 30000;
+
+        xhr.onload = function() {
+          btn.disabled = false;
+          step.textContent = '';
+          try {
+            var data = JSON.parse(xhr.responseText);
+            if (data.error) { toast('❌ Gemini: '+data.error.message,'err'); return; }
+            var txt = data.candidates && data.candidates[0] && data.candidates[0].content
+              && data.candidates[0].content.parts && data.candidates[0].content.parts[0]
+              ? data.candidates[0].content.parts[0].text : '';
+            if (!txt) { toast('❌ Gemini: réponse vide','err'); return; }
+            AI_RES = txt;
+            el('ai-txt').textContent = txt;
+            el('ai-res').style.display = 'block';
+            el('ai-src').style.display = pm1.length||pm2.length||fdaData ? 'flex' : 'none';
+            toast('✅ تم التحليل بناءً على دراسات حقيقية','ok');
+          } catch(e) {
+            toast('❌ Erreur de parsing: '+e.message,'err');
+          }
+        };
+
+        xhr.onerror = function() {
+          btn.disabled = false;
+          step.textContent = '';
+          toast('❌ Erreur réseau — vérifiez la connexion','err');
+        };
+
+        xhr.ontimeout = function() {
+          btn.disabled = false;
+          step.textContent = '';
+          toast('❌ Timeout — réessayez','err');
+        };
+
+        xhr.send(JSON.stringify({
+          contents:[{parts:[{text:prompt}]}],
+          generationConfig:{temperature:0.2, maxOutputTokens:2500}
+        }));
+      }
+
+      if (firstDrug) {
+        searchFDA(firstDrug, buildAndSend);
+      } else {
+        buildAndSend(null);
+      }
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//   PRESCRIPTION
+// ══════════════════════════════════════════════════════════════
+el('btn-use-rx').addEventListener('click', function() {
+  if (!CUR_PT) return;
+  var ds = new Date().toLocaleDateString('fr-DZ',{year:'numeric',month:'long',day:'numeric'});
+  el('rx-n').textContent = CUR_PT.name;
+  el('rx-a').textContent = CUR_PT.age+' ans · '+(CUR_PT.sex==='m'?'M':'F');
+  el('rx-d').textContent = CUR_PT.diag;
+  el('rx-dh').textContent = ds;
+  el('rx-df').textContent = ds;
+  el('rx-dn').textContent = DOC.name;
+  el('rx-ds').textContent = DOC.spec;
+  if (AI_RES) el('rx-drugs').value = AI_RES;
+  CUR_DRUGS_RX = [];
+  renderDrugList(CUR_DRUGS_RX, el('dl-rx'), true);
+  el('drug-rx-input').value = '';
+  el('dd-rx').style.display = 'none';
+  VIDS.forEach(function(v){var e=el('v-'+v);if(e)e.classList.remove('on');});
+  ['bn-dash','bn-new','bn-set'].forEach(function(n){var e=el(n);if(e)e.classList.remove('on');});
+  el('v-rx').classList.add('on');
+  el('bn-new').classList.add('on');
+  el('app-body').scrollTop=0;
+});
+
+el('btn-back-ai').addEventListener('click', function() {
+  VIDS.forEach(function(v){var e=el('v-'+v);if(e)e.classList.remove('on');});
+  ['bn-dash','bn-new','bn-set'].forEach(function(n){var e=el(n);if(e)e.classList.remove('on');});
+  el('v-ai').classList.add('on');
+  el('bn-new').classList.add('on');
+  el('app-body').scrollTop=0;
+});
+
+el('btn-save-rx').addEventListener('click', function() {
+  if (!CUR_PT) { toast('⚠️ لا توجد بيانات مريض','err'); return; }
+  CUR_PT.rx = el('rx-drugs').value;
+  dbSavePatient(CUR_PT, function(saved) {
+    if (!saved) { toast('❌ خطأ في الحفظ','err'); return; }
+    CUR_PT = saved;
+    var idx = ALL_PTS.findIndex(function(p){ return p.id===saved.id; });
+    if (idx>=0) ALL_PTS[idx]=saved; else ALL_PTS.push(saved);
+    toast('✅ تم حفظ الوصفة','ok');
+  });
+});
+
+el('btn-print').addEventListener('click', function() {
+  STATS.today++;
+  dbSaveConfig('stats', STATS);
+  el('st-tod').textContent = STATS.today;
+  window.print();
+});
+
+// ══════════════════════════════════════════════════════════════
+//   SETTINGS
+// ══════════════════════════════════════════════════════════════
+function loadSet() {
+  el('s-name').value = DOC.name;
+  el('s-spec').value = DOC.spec;
+  el('s-key').value  = DOC.key;
+}
+el('btn-save-set').addEventListener('click', function() {
+  DOC.name = el('s-name').value.trim();
+  DOC.spec = el('s-spec').value.trim();
+  DOC.key  = el('s-key').value.trim();
+  dbSaveConfig('doc', DOC);
+  applyDocUI();
+  toast('✅ Paramètres enregistrés','ok');
+});
+
+// ══════════════════════════════════════════════════════════════
+//   BOTTOM NAV
+// ══════════════════════════════════════════════════════════════
+el('bn-dash').addEventListener('click', function(){ gotoV('dash'); });
+el('bn-new').addEventListener('click',  function(){ gotoV('new'); });
+el('bn-set').addEventListener('click',  function(){ gotoV('set'); });
+
+// ══════════════════════════════════════════════════════════════
+//   INIT
+// ══════════════════════════════════════════════════════════════
+initDB(function() {
+  dbGetConfig('doc', null, function(savedDoc) {
+    if (savedDoc) {
+      DOC = savedDoc;
+      el('i-name').value = DOC.name || '';
+      el('i-spec').value = DOC.spec || '';
+      el('i-key').value  = DOC.key  || '';
+    } else {
+      el('i-name').value = 'Dr. Amin Bellala';
+      el('i-spec').value = 'Psychiatre — Psychologue Clinicien';
+    }
+    dbGetConfig('stats', {today:0,ai:0}, function(s) {
+      STATS = s;
+    });
+  });
+});
+
+// Setup drug autocomplete for both inputs
+setupDrugInput('drug-cur-input','dd-cur','dl-cur',CUR_DRUGS_NEW,false);
+setupDrugInput('drug-rx-input','dd-rx','dl-rx',CUR_DRUGS_RX,true);
+</script>
+</body>
+</html>
