@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RxAI">
+<meta name="theme-color" content="#0a1628">
+<title>RxAI — المساعد الطبي الذكي</title>
+<style>
+:root{
+  --navy:#0a1628;--navy2:#0f2040;--teal:#0d9488;--teal2:#14b8a6;
+  --tealL:#ccfbf1;--gold:#f59e0b;--red:#ef4444;
+  --gray2:#94a3b8;--gray3:#475569;--text:#1e293b;--border:#e2e8f0;--bg:#f0f4f8;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);direction:rtl;display:flex;flex-direction:column;}
+
+/* ── SCREENS ── */
+.scr{display:none;height:100%;flex-direction:column;}
+.scr.on{display:flex;}
+
+/* ── LOGIN ── */
+#scr-login{background:linear-gradient(135deg,var(--navy),#0f3460,#16213e);align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.lcard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:36px 28px;width:100%;max-width:420px;}
+.llogo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:8px;}
+.licon{width:48px;height:48px;background:linear-gradient(135deg,var(--teal),var(--teal2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.ltitle{font-size:28px;font-weight:900;color:#fff;}
+.lsub{text-align:center;color:rgba(255,255,255,.5);font-size:13px;margin-bottom:24px;}
+.llbl{color:rgba(255,255,255,.7);font-size:13px;margin-bottom:5px;display:block;margin-top:10px;}
+.linput{width:100%;padding:12px 14px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:10px;color:#fff;font-family:inherit;font-size:15px;outline:none;direction:ltr;}
+.linput::placeholder{color:rgba(255,255,255,.3);}
+.lbtn{width:100%;padding:14px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;margin-top:16px;}
+.anote{margin-top:14px;padding:11px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:8px;color:rgba(255,255,255,.7);font-size:12px;line-height:1.7;text-align:center;}
+.anote a{color:var(--gold);}
+
+/* ── APP LAYOUT ── */
+#scr-app{flex-direction:column;}
+.navbar{background:var(--navy);padding:0 12px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,.25);position:relative;z-index:50;}
+.nbrand{display:flex;align-items:center;gap:8px;}
+.nicon{width:28px;height:28px;background:linear-gradient(135deg,var(--teal),var(--teal2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.ntitle{font-size:17px;font-weight:900;color:#fff;}
+.ntitle span{color:var(--teal2);}
+.nsrc{display:flex;gap:4px;}
+.nsrc-badge{background:rgba(13,148,136,.25);border:1px solid rgba(13,148,136,.4);color:var(--teal2);font-size:9px;padding:1px 6px;border-radius:10px;font-weight:700;}
+.zoom-ctrl{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:3px 9px;}
+.zbtn{background:none;border:none;color:var(--teal2);font-size:18px;cursor:pointer;line-height:1;padding:0 2px;font-weight:700;}
+.zlbl{color:#fff;font-size:12px;font-weight:700;min-width:34px;text-align:center;}
+.zreset{background:rgba(13,148,136,.3);border:none;color:#fff;border-radius:5px;cursor:pointer;font-size:10px;padding:2px 6px;}
+.dbadge{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:3px 8px;color:rgba(255,255,255,.8);font-size:12px;}
+.dav{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--gold));display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700;}
+.bout{background:transparent;border:1px solid rgba(239,68,68,.35);color:rgba(239,68,68,.8);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;font-family:inherit;}
+
+/* ── CONTENT SCROLL AREA ── */
+.app-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:64px;}
+.scale-wrap{transform-origin:top right;}
+
+/* ── VIEWS ── */
+.view{display:none;padding:14px;}
+.view.on{display:block;}
+.ptitle{font-size:18px;font-weight:700;margin-bottom:2px;}
+.psub{font-size:13px;color:var(--gray2);margin-bottom:16px;}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+.sc{background:#fff;border-radius:12px;padding:13px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);border-top:3px solid var(--border);}
+.sc.t{border-top-color:var(--teal);}
+.sc.g{border-top-color:var(--gold);}
+.sc.n{border-top-color:var(--navy);}
+.snum{font-size:24px;font-weight:900;}
+.slb{font-size:11px;color:var(--gray2);margin-top:2px;}
+
+/* ── SOURCE INFO ── */
+.srcbox{background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:12px;padding:13px 15px;margin-bottom:16px;display:flex;gap:14px;flex-wrap:wrap;}
+.srcitem{display:flex;align-items:center;gap:8px;flex:1;min-width:130px;}
+.srcitem-ico{font-size:20px;}
+.srcitem-name{color:var(--teal2);font-size:12px;font-weight:700;}
+.srcitem-desc{color:rgba(255,255,255,.5);font-size:11px;}
+
+/* ── CARDS ── */
+.fcard{background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden;margin-bottom:15px;}
+.fhead{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:12px 17px;display:flex;align-items:center;gap:8px;}
+.fhead h3{color:#fff;font-size:14px;font-weight:700;margin:0;flex:1;}
+.fhead .live-badge{background:var(--teal);color:#fff;font-size:9px;padding:2px 7px;border-radius:10px;font-weight:700;}
+.fbody{padding:15px;}
+
+/* ── PATIENT LIST ── */
+.plist{display:flex;flex-direction:column;gap:10px;}
+.prow{background:#f8fafc;border-radius:10px;padding:12px 14px;cursor:pointer;border-right:4px solid var(--teal);display:flex;justify-content:space-between;align-items:center;}
+.prow-name{font-size:14px;font-weight:700;}
+.prow-meta{font-size:12px;color:var(--gray2);margin-top:2px;}
+.pdiag-badge{background:var(--tealL);color:var(--teal);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;display:block;margin-bottom:4px;}
+.pdate{font-size:11px;color:var(--gray2);}
+.empty{text-align:center;color:var(--gray2);padding:28px 0;}
+.empty-ico{font-size:38px;margin-bottom:10px;}
+
+/* ── FORM ── */
+.frow2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px;}
+.frow1{margin-bottom:11px;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.flbl{font-size:13px;font-weight:700;color:var(--gray3);}
+.flbl em{color:var(--red);font-style:normal;}
+.fi{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:15px;color:var(--text);outline:none;background:#fff;direction:rtl;width:100%;}
+.fi:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.1);}
+textarea.fi{resize:vertical;line-height:1.6;}
+
+/* ── AI PANEL ── */
+.aipanel{background:linear-gradient(135deg,var(--navy),#0f3460);border-radius:14px;padding:18px;overflow:hidden;}
+.ai-title{color:#fff;font-size:15px;font-weight:700;margin-bottom:5px;}
+.ai-sub{color:rgba(255,255,255,.5);font-size:13px;margin-bottom:13px;}
+.ai-pipeline{display:flex;gap:5px;margin-bottom:13px;flex-wrap:wrap;align-items:center;}
+.ai-pipe-item{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:4px 8px;color:rgba(255,255,255,.75);font-size:11px;}
+.ai-pipe-arrow{color:rgba(255,255,255,.3);font-size:14px;}
+.ai-disc{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.28);border-radius:8px;padding:10px 12px;margin-bottom:13px;color:rgba(255,255,255,.8);font-size:12px;line-height:1.7;}
+.ai-run-btn{width:100%;padding:13px;background:var(--teal);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ai-run-btn:disabled{background:#444;cursor:not-allowed;}
+.ai-step{color:rgba(255,255,255,.6);font-size:12px;margin-top:10px;text-align:center;}
+.ai-sources{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;align-items:center;}
+.ai-src-lbl{color:rgba(255,255,255,.4);font-size:11px;}
+.ai-src-badge{background:rgba(13,148,136,.3);border:1px solid rgba(13,148,136,.5);color:var(--teal2);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700;}
+.ai-result{margin-top:13px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px;}
+.ai-result-text{color:rgba(255,255,255,.88);font-size:12.5px;line-height:1.9;white-space:pre-wrap;direction:ltr;text-align:left;font-family:monospace;max-height:380px;overflow-y:auto;}
+.ai-result-acts{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap;}
+.abtn{flex:1;padding:10px 14px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;}
+.rbtn{flex:1;padding:10px 14px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:8px;font-family:inherit;font-size:14px;cursor:pointer;}
+
+/* ── RX PAPER ── */
+.rxpaper{background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.1);overflow:hidden;}
+.rxhead{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:15px 19px;display:flex;justify-content:space-between;align-items:flex-start;}
+.rx-doc-name{font-size:17px;font-weight:900;color:#fff;margin-bottom:2px;}
+.rx-doc-spec{color:rgba(255,255,255,.6);font-size:12px;}
+.rx-date-h{color:rgba(255,255,255,.4);font-size:11px;margin-top:5px;}
+.rx-src-badges{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;}
+.rx-src-b{background:rgba(13,148,136,.3);color:var(--teal2);font-size:9px;padding:1px 6px;border-radius:10px;font-weight:700;}
+.rxbody{padding:17px;}
+.rxsec{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gray2);text-transform:uppercase;padding-bottom:5px;border-bottom:1px solid var(--border);margin-bottom:11px;margin-top:14px;}
+.rx-pt-row{display:flex;flex-direction:column;gap:7px;}
+.rx-pt-field{display:flex;gap:8px;}
+.rx-fl{font-size:12px;color:var(--gray2);min-width:90px;}
+.rx-fv{font-size:13px;font-weight:700;}
+.rxarea{width:100%;padding:11px;border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px;line-height:1.8;color:var(--text);outline:none;resize:vertical;direction:rtl;background:#fafbfc;}
+.rxarea:focus{border-color:var(--teal);}
+.rxfoot{display:flex;justify-content:space-between;align-items:center;padding:12px 17px;background:#f8fafc;border-top:1px solid var(--border);}
+.rx-date-f{font-size:12px;color:var(--gray2);}
+.rx-sig-lbl{font-size:11px;color:var(--gray2);}
+.rx-sig-line{width:120px;border-bottom:1px solid var(--border);margin-top:24px;}
+
+/* ── SETTINGS ── */
+.scard{background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:18px;margin-bottom:14px;}
+.scard h3{font-size:14px;font-weight:700;margin-bottom:15px;padding-bottom:9px;border-bottom:1px solid var(--border);}
+.srow{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.slbl2{font-size:13px;font-weight:700;color:var(--gray3);}
+.shint{font-size:11px;color:var(--gray2);margin-top:3px;}
+.shint a{color:var(--teal);}
+.srcinfo{background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:12px;padding:15px;}
+.srcinfo-title{color:var(--teal2);font-size:13px;font-weight:700;margin-bottom:12px;}
+.srcinfo-item{display:flex;gap:10px;margin-bottom:11px;padding:10px 11px;background:rgba(255,255,255,.05);border-radius:9px;}
+.srcinfo-ico{font-size:20px;}
+.srcinfo-name{color:#fff;font-size:13px;font-weight:700;}
+.srcinfo-desc{color:rgba(255,255,255,.55);font-size:11px;margin-top:2px;line-height:1.5;}
+.srcinfo-free{background:rgba(13,148,136,.3);color:var(--teal2);font-size:10px;padding:1px 7px;border-radius:10px;display:inline-block;margin-top:5px;}
+
+/* ── BUTTONS ── */
+.bp{display:inline-flex;align-items:center;gap:7px;padding:11px 20px;background:var(--teal);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+.bs{display:inline-flex;align-items:center;gap:7px;padding:11px 20px;background:#fff;color:var(--text);border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+.bpr{display:inline-flex;align-items:center;gap:7px;padding:11px 20px;background:var(--navy);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+.actrow{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--navy);display:flex;border-top:1px solid rgba(255,255,255,.1);z-index:100;height:58px;}
+.bnav-btn{flex:1;padding:8px 0;background:transparent;border:none;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;color:rgba(255,255,255,.5);}
+.bnav-btn.on{color:var(--teal2);}
+.bnav-ico{font-size:20px;}
+.bnav-lbl{font-size:10px;}
+.bnav-dot{width:4px;height:4px;border-radius:50%;background:var(--teal2);}
+
+/* ── SPINNER ── */
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:var(--teal);color:#fff;padding:10px 20px;border-radius:9px;font-size:14px;z-index:999;box-shadow:0 6px 20px rgba(0,0,0,.3);white-space:nowrap;transition:opacity .3s;}
+.toast.err{background:var(--red);}
+.toast.hide{opacity:0;pointer-events:none;}
+
+/* ── PRINT ── */
+@media print{
+  .navbar,.bottom-nav,.actrow,.zoom-ctrl,.bout,.np{display:none!important;}
+  .app-scroll{padding-bottom:0;}
+  body{overflow:visible;}
+  .rxpaper{box-shadow:none;border-radius:0;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="scr-login" class="scr on">
+  <div class="lcard">
+    <div class="llogo">
+      <div class="licon">💊</div>
+      <div class="ltitle">Rx<span style="color:var(--teal2)">AI</span></div>
+    </div>
+    <p class="lsub">المساعد الطبي الذكي — Assistant Médical IA</p>
+    <label class="llbl">اسم الطبيب / Nom du médecin</label>
+    <input id="i-name" class="linput" type="text" placeholder="Dr. Amin Bellala">
+    <label class="llbl">التخصص / Spécialité</label>
+    <input id="i-spec" class="linput" type="text" placeholder="Psychiatre — Psychologue Clinicien">
+    <label class="llbl">🔑 Gemini API Key</label>
+    <input id="i-key" class="linput" type="password" placeholder="AIza...">
+    <button class="lbtn" onclick="doLogin()">دخول — Connexion ←</button>
+    <div class="anote">
+      مفتاح Gemini مجاني من
+      <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a><br>
+      <span style="color:rgba(255,255,255,.4)">PubMed + OpenFDA: لا يحتاج مفتاح</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="scr-app" class="scr">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nbrand">
+      <div class="nicon">💊</div>
+      <span class="ntitle">Rx<span>AI</span></span>
+      <div class="nsrc">
+        <span class="nsrc-badge">PubMed</span>
+        <span class="nsrc-badge">FDA</span>
+      </div>
+    </div>
+    <div class="zoom-ctrl">
+      <button class="zbtn" onclick="changeZoom(-10)">−</button>
+      <span class="zlbl" id="zoom-lbl">100%</span>
+      <button class="zbtn" onclick="changeZoom(10)">+</button>
+      <button class="zreset" onclick="resetZoom()">↺</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="dbadge">
+        <div class="dav" id="d-av">د</div>
+        <span id="d-nm" style="max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">الطبيب</span>
+      </div>
+      <button class="bout" onclick="doLogout()">خروج</button>
+    </div>
+  </nav>
+
+  <!-- SCROLLABLE CONTENT -->
+  <div class="app-scroll" id="app-scroll">
+    <div class="scale-wrap" id="scale-wrap">
+
+      <!-- ── DASHBOARD ── -->
+      <div id="v-dash" class="view on">
+        <div class="ptitle">لوحة التحكم</div>
+        <div class="psub" id="dash-welcome">مرحباً — إليك نظرة عامة على عملك</div>
+        <div class="srcbox">
+          <div class="srcitem"><span class="srcitem-ico">🔬</span><div><div class="srcitem-name">PubMed NCBI</div><div class="srcitem-desc">دراسات 2020-2024 مباشرة</div></div></div>
+          <div class="srcitem"><span class="srcitem-ico">💊</span><div><div class="srcitem-name">OpenFDA</div><div class="srcitem-desc">تفاعلات وموانع الأدوية</div></div></div>
+          <div class="srcitem"><span class="srcitem-ico">🤖</span><div><div class="srcitem-name">Gemini AI</div><div class="srcitem-desc">تحليل وصياغة الاقتراح</div></div></div>
+        </div>
+        <div class="stats">
+          <div class="sc t"><div class="snum" id="st-tot">0</div><div class="slb">المرضى</div></div>
+          <div class="sc g"><div class="snum" id="st-tod">0</div><div class="slb">وصفات اليوم</div></div>
+          <div class="sc n"><div class="snum" id="st-ai">0</div><div class="slb">استشارات AI</div></div>
+        </div>
+        <div class="fcard">
+          <div class="fhead"><h3>👥 قائمة المرضى</h3></div>
+          <div class="fbody">
+            <div id="pts-list" class="plist">
+              <div class="empty"><div class="empty-ico">📋</div><div>لا يوجد مرضى — اضغط "مريض جديد"</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── NEW PATIENT ── -->
+      <div id="v-new" class="view">
+        <div class="ptitle">ملف مريض جديد</div>
+        <div class="psub">أدخل البيانات للحصول على اقتراح مبني على دراسات حقيقية</div>
+        <div class="fcard">
+          <div class="fhead"><h3>👤 معلومات المريض</h3></div>
+          <div class="fbody">
+            <div class="frow2">
+              <div class="fg"><label class="flbl">الاسم <em>*</em></label><input class="fi" id="p-name" type="text" placeholder="أحمد بن علي"></div>
+              <div class="fg"><label class="flbl">العمر <em>*</em></label><input class="fi" id="p-age" type="number" placeholder="35"></div>
+            </div>
+            <div class="frow2">
+              <div class="fg"><label class="flbl">الجنس</label>
+                <select class="fi" id="p-sex"><option value="m">ذكر</option><option value="f">أنثى</option></select>
+              </div>
+              <div class="fg"><label class="flbl">الوظيفة</label><input class="fi" id="p-job" type="text" placeholder="مدرّس"></div>
+            </div>
+            <div class="frow1 fg"><label class="flbl">أمراض مزمنة</label><input class="fi" id="p-chr" type="text" placeholder="داء السكري، ارتفاع ضغط الدم..."></div>
+            <div class="frow1 fg"><label class="flbl">الأدوية الحالية</label><input class="fi" id="p-med" type="text" placeholder="ميتفورمين 500مغ — سيتم التحقق من التفاعلات تلقائياً"></div>
+          </div>
+        </div>
+        <div class="fcard">
+          <div class="fhead"><h3>🩺 البيانات السريرية</h3></div>
+          <div class="fbody">
+            <div class="frow1 fg"><label class="flbl">الأعراض <em>*</em></label>
+              <textarea class="fi" id="p-sym" rows="3" placeholder="اكتئاب شديد مع أرق، فقدان الشهية منذ 3 أسابيع..."></textarea>
+            </div>
+            <div class="frow1 fg"><label class="flbl">التشخيص <em>*</em></label>
+              <input class="fi" id="p-diag" type="text" placeholder="اضطراب اكتئابي كبير F32.2">
+            </div>
+            <div class="frow1 fg"><label class="flbl">الشدة</label>
+              <select class="fi" id="p-sev">
+                <option value="mild">خفيفة</option>
+                <option value="moderate" selected>متوسطة</option>
+                <option value="severe">شديدة</option>
+              </select>
+            </div>
+            <div class="frow1 fg"><label class="flbl">ملاحظات الطبيب</label>
+              <textarea class="fi" id="p-note" rows="2" placeholder="ملاحظات خاصة..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="actrow">
+          <button class="bs" onclick="gotoV('dash')">↩ رجوع</button>
+          <button class="bp" onclick="goToAI()">🤖 طلب اقتراح دوائي</button>
+        </div>
+      </div>
+
+      <!-- ── AI ── -->
+      <div id="v-ai" class="view">
+        <div class="ptitle">الاقتراح الدوائي — أدلة علمية حقيقية</div>
+        <div class="psub">PubMed + OpenFDA + Gemini AI — بحث حي في الدراسات</div>
+        <div class="aipanel">
+          <div class="ai-title">🔬 استشارة مبنية على أدلة علمية</div>
+          <p class="ai-sub" id="ai-sum"></p>
+          <div class="ai-pipeline">
+            <span class="ai-pipe-item">🔍 PubMed</span>
+            <span class="ai-pipe-arrow">›</span>
+            <span class="ai-pipe-item">💊 OpenFDA</span>
+            <span class="ai-pipe-arrow">›</span>
+            <span class="ai-pipe-item">🤖 Gemini</span>
+            <span class="ai-pipe-arrow">›</span>
+            <span class="ai-pipe-item">📋 الاقتراح</span>
+          </div>
+          <div class="ai-disc">⚠️ هذه الاقتراحات استشارية فقط. القرار العلاجي النهائي يعود حصراً للطبيب المعالج.</div>
+          <button class="ai-run-btn" id="ai-btn" onclick="askGemini()">✨ ابدأ البحث والتحليل</button>
+          <div class="ai-step" id="ai-step"></div>
+          <div class="ai-sources" id="ai-sources" style="display:none">
+            <span class="ai-src-lbl">مصادر:</span>
+            <span class="ai-src-badge">✓ PubMed NCBI</span>
+            <span class="ai-src-badge">✓ OpenFDA</span>
+          </div>
+          <div class="ai-result" id="ai-result" style="display:none">
+            <div class="ai-result-text" id="ai-text"></div>
+            <div class="ai-result-acts">
+              <button class="abtn" onclick="gotoV('rx')">✅ استخدام في الوصفة</button>
+              <button class="rbtn" onclick="askGemini()">🔄 بحث جديد</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RX ── -->
+      <div id="v-rx" class="view">
+        <div class="ptitle np">الوصفة الطبية النهائية</div>
+        <div class="psub np">راجع وعدّل الوصفة — القرار للطبيب</div>
+        <div class="rxpaper">
+          <div class="rxhead">
+            <div>
+              <div class="rx-doc-name" id="rx-doc-n">—</div>
+              <div class="rx-doc-spec" id="rx-doc-s">—</div>
+              <div class="rx-date-h" id="rx-date-h"></div>
+              <div class="rx-src-badges">
+                <span class="rx-src-b">✓ PubMed</span>
+                <span class="rx-src-b">✓ OpenFDA</span>
+              </div>
+            </div>
+            <div style="font-size:30px;opacity:.35">💊</div>
+          </div>
+          <div class="rxbody">
+            <div class="rxsec">معلومات المريض</div>
+            <div class="rx-pt-row">
+              <div class="rx-pt-field"><div class="rx-fl">الاسم:</div><div class="rx-fv" id="rx-n">—</div></div>
+              <div class="rx-pt-field"><div class="rx-fl">العمر / الجنس:</div><div class="rx-fv" id="rx-a">—</div></div>
+              <div class="rx-pt-field"><div class="rx-fl">التشخيص:</div><div class="rx-fv" id="rx-d">—</div></div>
+            </div>
+            <div class="rxsec">الوصفة الدوائية</div>
+            <textarea class="rxarea" id="rx-drugs" rows="7" placeholder="اكتب الوصفة أو استخدم اقتراح AI..."></textarea>
+            <div class="rxsec">تعليمات للمريض</div>
+            <textarea class="rxarea" id="rx-inst" rows="3" placeholder="تعليمات إضافية..."></textarea>
+          </div>
+          <div class="rxfoot">
+            <div class="rx-date-f" id="rx-date-f"></div>
+            <div><div class="rx-sig-lbl">توقيع الطبيب — Signature</div><div class="rx-sig-line"></div></div>
+          </div>
+        </div>
+        <div class="actrow np">
+          <button class="bs" onclick="gotoV('ai')">↩ رجوع</button>
+          <button class="bs" onclick="savePt()">💾 حفظ</button>
+          <button class="bpr" onclick="doPrint()">🖨️ طباعة</button>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div id="v-set" class="view">
+        <div class="ptitle">الإعدادات</div>
+        <div class="psub">إدارة إعدادات التطبيق</div>
+        <div class="scard">
+          <h3>معلومات الطبيب</h3>
+          <div class="srow"><label class="slbl2">الاسم</label><input class="fi" id="s-name" type="text"></div>
+          <div class="srow"><label class="slbl2">التخصص</label><input class="fi" id="s-spec" type="text"></div>
+          <div class="srow">
+            <label class="slbl2">Gemini API Key</label>
+            <input class="fi" id="s-key" type="password" placeholder="AIza..." style="direction:ltr">
+            <div class="shint">مجاني من <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></div>
+          </div>
+          <button class="bp" style="width:100%;justify-content:center" onclick="saveSet()">💾 حفظ الإعدادات</button>
+        </div>
+        <div class="srcinfo">
+          <div class="srcinfo-title">🔬 مصادر البيانات الطبية</div>
+          <div class="srcinfo-item">
+            <span class="srcinfo-ico">🔬</span>
+            <div><div class="srcinfo-name">PubMed NCBI</div><div class="srcinfo-desc">قاعدة بيانات المعاهد الوطنية للصحة الأمريكية — أكثر من 35 مليون مقالة طبية محكّمة</div><span class="srcinfo-free">مجاني — لا يحتاج مفتاح</span></div>
+          </div>
+          <div class="srcinfo-item">
+            <span class="srcinfo-ico">💊</span>
+            <div><div class="srcinfo-name">OpenFDA</div><div class="srcinfo-desc">قاعدة بيانات إدارة الغذاء والدواء الأمريكية — تفاعلات وموانع وجرعات الأدوية</div><span class="srcinfo-free">مجاني — لا يحتاج مفتاح</span></div>
+          </div>
+          <div class="srcinfo-item">
+            <span class="srcinfo-ico">🤖</span>
+            <div><div class="srcinfo-name">Gemini 1.5 Flash</div><div class="srcinfo-desc">نموذج Google للذكاء الاصطناعي — يقرأ البيانات الحقيقية ويصوغ الاقتراح السريري</div><span class="srcinfo-free">يحتاج API Key مجاني</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end scale-wrap -->
+  </div><!-- end app-scroll -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="bnav-btn on" id="bn-dash" onclick="gotoV('dash')">
+      <span class="bnav-ico">🏠</span><span class="bnav-lbl">الرئيسية</span>
+    </button>
+    <button class="bnav-btn" id="bn-new" onclick="gotoV('new')">
+      <span class="bnav-ico">➕</span><span class="bnav-lbl">مريض جديد</span>
+    </button>
+    <button class="bnav-btn" id="bn-set" onclick="gotoV('set')">
+      <span class="bnav-ico">⚙️</span><span class="bnav-lbl">الإعدادات</span>
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast hide" id="toast"></div>
+
+<script>
+(function(){
+// ── STATE ──
+var DOC  = {name:'', spec:'', key:''};
+var PTS  = [];
+var STAT = {today:0, ai:0};
+var PT   = {};
+var AI_R = '';
+var ZOOM = 100;
+var _tt;
+
+// ── UTILS ──
+function ls(k,d){ try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;} }
+function lsw(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function el(id){ return document.getElementById(id); }
+function toast(msg,type){
+  clearTimeout(_tt);
+  var t=el('toast');
+  t.textContent=msg;
+  t.className='toast'+(type==='err'?' err':'');
+  _tt=setTimeout(function(){t.className='toast hide';},3500);
+}
+
+// ── ZOOM ──
+function changeZoom(d){ ZOOM=Math.min(150,Math.max(50,ZOOM+d)); applyZoom(); }
+function resetZoom(){ ZOOM=100; applyZoom(); }
+function applyZoom(){
+  var sw=el('scale-wrap');
+  var pct=ZOOM/100;
+  sw.style.transform='scale('+pct+')';
+  sw.style.width=(10000/ZOOM)+'%';
+  el('zoom-lbl').textContent=ZOOM+'%';
+}
+
+// ── VIEWS ──
+var VIEWS=['dash','new','ai','rx','set'];
+var NAV_MAP={dash:'bn-dash','new':'bn-new',ai:'bn-new',rx:'bn-new',set:'bn-set'};
+
+function gotoV(name){
+  VIEWS.forEach(function(v){ var e=el('v-'+v); if(e) e.classList.remove('on'); });
+  ['bn-dash','bn-new','bn-set'].forEach(function(n){ var e=el(n); if(e) e.classList.remove('on'); });
+  var t=el('v-'+name);
+  if(t) t.classList.add('on');
+  var nb=el(NAV_MAP[name]||'bn-dash');
+  if(nb) nb.classList.add('on');
+  el('app-scroll').scrollTop=0;
+  if(name==='dash')  refreshDash();
+  if(name==='set')   loadSet();
+  if(name==='new')   clearForm();
+}
+window.gotoV=gotoV;
+
+// ── LOGIN ──
+window.doLogin=function(){
+  var name=el('i-name').value.trim();
+  var spec=el('i-spec').value.trim();
+  var key=el('i-key').value.trim();
+  if(!name){toast('⚠️ أدخل اسم الطبيب','err');return;}
+  if(!key){toast('⚠️ أدخل مفتاح Gemini','err');return;}
+  DOC={name:name,spec:spec,key:key};
+  lsw('rxai_doc',DOC);
+  applyDocToUI();
+  el('scr-login').classList.remove('on');
+  el('scr-app').classList.add('on');
+  refreshDash();
+};
+window.doLogout=function(){
+  el('scr-app').classList.remove('on');
+  el('scr-login').classList.add('on');
+};
+function applyDocToUI(){
+  el('d-nm').textContent=DOC.name;
+  el('d-av').textContent=DOC.name.replace(/Dr\.?\s*/i,'').charAt(0).toUpperCase()||'د';
+  el('rx-doc-n').textContent=DOC.name;
+  el('rx-doc-s').textContent=DOC.spec;
+}
+
+// ── FORM ──
+function clearForm(){
+  ['p-name','p-age','p-job','p-chr','p-med','p-sym','p-diag','p-note'].forEach(function(id){
+    var e=el(id); if(e) e.value='';
+  });
+  el('p-sex').value='m';
+  el('p-sev').value='moderate';
+  PT={}; AI_R='';
+  el('ai-result').style.display='none';
+  el('ai-step').textContent='';
+  el('ai-sources').style.display='none';
+  el('ai-btn').disabled=false;
+  el('rx-drugs').value='';
+  el('rx-inst').value='';
+}
+
+function collectPT(){
+  return {
+    name:el('p-name').value.trim(), age:el('p-age').value,
+    sex:el('p-sex').value, job:el('p-job').value.trim(),
+    chr:el('p-chr').value.trim(), med:el('p-med').value.trim(),
+    sym:el('p-sym').value.trim(), diag:el('p-diag').value.trim(),
+    sev:el('p-sev').value, note:el('p-note').value.trim(),
+    date:new Date().toLocaleDateString('fr-DZ'), rx:''
+  };
+}
+
+window.goToAI=function(){
+  if(!el('p-name').value.trim()){toast('⚠️ أدخل اسم المريض','err');return;}
+  if(!el('p-sym').value.trim()) {toast('⚠️ أدخل الأعراض','err');return;}
+  if(!el('p-diag').value.trim()){toast('⚠️ أدخل التشخيص','err');return;}
+  PT=collectPT();
+  var sm={mild:'خفيفة',moderate:'متوسطة',severe:'شديدة'};
+  el('ai-sum').textContent=PT.name+' · '+PT.age+' سنة · '+(PT.sex==='m'?'ذكر':'أنثى')+' · '+PT.diag+' · '+(sm[PT.sev]||'');
+  el('ai-result').style.display='none';
+  el('ai-step').textContent='';
+  el('ai-sources').style.display='none';
+  el('ai-btn').disabled=false;
+  VIEWS.forEach(function(v){var e=el('v-'+v);if(e)e.classList.remove('on');});
+  ['bn-dash','bn-new','bn-set'].forEach(function(n){var e=el(n);if(e)e.classList.remove('on');});
+  el('v-ai').classList.add('on');
+  el('bn-new').classList.add('on');
+  el('app-scroll').scrollTop=0;
+};
+
+// ── PUBMED ──
+async function searchPubMed(query,max){
+  try{
+    max=max||5;
+    var u='https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term='+encodeURIComponent(query)+'&retmax='+max+'&sort=date&retmode=json&datetype=pdat&mindate=2020&maxdate=2025';
+    var r=await fetch(u);
+    var d=await r.json();
+    var ids=d.esearchresult&&d.esearchresult.idlist?d.esearchresult.idlist:[];
+    if(!ids.length) return [];
+    var u2='https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id='+ids.join(',')+'&retmode=json';
+    var r2=await fetch(u2);
+    var d2=await r2.json();
+    var res=d2.result||{};
+    return ids.map(function(id){
+      var a=res[id]||{};
+      return {title:a.title||'',authors:(a.authors||[]).slice(0,2).map(function(x){return x.name;}).join(', '),journal:a.source||'',year:(a.pubdate||'').substring(0,4),pmid:id};
+    }).filter(function(a){return a.title;});
+  }catch(e){return [];}
+}
+
+// ── OPENFDA ──
+async function searchFDA(drug){
+  try{
+    var u='https://api.fda.gov/drug/label.json?search=openfda.generic_name:"'+encodeURIComponent(drug)+'"&limit=1';
+    var r=await fetch(u);
+    var d=await r.json();
+    var res=d.results&&d.results[0]?d.results[0]:{};
+    return {
+      warnings:(res.warnings||[''])[0].substring(0,300),
+      interactions:(res.drug_interactions||[''])[0].substring(0,300),
+      contraindications:(res.contraindications||[''])[0].substring(0,300)
+    };
+  }catch(e){return null;}
+}
+
+// ── GEMINI ──
+window.askGemini=async function(){
+  if(!DOC.key){toast('⚠️ مفتاح API مفقود','err');return;}
+  var btn=el('ai-btn');
+  var step=el('ai-step');
+  var src=el('ai-sources');
+  var res=el('ai-result');
+  btn.disabled=true;
+  res.style.display='none';
+  src.style.display='none';
+  STAT.ai++;
+  lsw('rxai_stat',STAT);
+  el('st-ai').textContent=STAT.ai;
+
+  try{
+    // Phase 1: PubMed
+    step.innerHTML='<span class="spin"></span> 🔍 البحث في PubMed عن الدراسات الحديثة...';
+    var q1=PT.diag+' pharmacotherapy treatment 2022 2023 2024';
+    var pm1=await searchPubMed(q1,5);
+    var q2=PT.diag+' '+PT.sev+' severity medication randomized controlled trial';
+    var pm2=await searchPubMed(q2,3);
+
+    // Phase 2: OpenFDA
+    step.innerHTML='<span class="spin"></span> 💊 التحقق من التفاعلات الدوائية (OpenFDA)...';
+    var fdaData=null;
+    if(PT.med&&PT.med.trim()){
+      var drugName=PT.med.split(/[,،]/)[0].trim().split(' ')[0];
+      fdaData=await searchFDA(drugName);
+    }
+
+    // Build context
+    var ctx='';
+    if(pm1.length){
+      ctx+='\n📚 ÉTUDES PUBMED — '+PT.diag+':\n';
+      pm1.forEach(function(a,i){ ctx+=(i+1)+'. '+a.title+'\n   '+a.authors+' ('+a.year+') — '+a.journal+' [PMID:'+a.pmid+']\n'; });
+    }
+    if(pm2.length){
+      ctx+='\n📚 ÉTUDES SÉVÉRITÉ ('+PT.sev+'):\n';
+      pm2.forEach(function(a,i){ ctx+=(i+1)+'. '+a.title+' ('+a.year+') [PMID:'+a.pmid+']\n'; });
+    }
+    if(fdaData){
+      ctx+='\n🔴 DONNÉES OPENFDA:\n';
+      ctx+='• Interactions: '+(fdaData.interactions||'Non disponible')+'\n';
+      ctx+='• Contre-indications: '+(fdaData.contraindications||'Non disponible')+'\n';
+    }
+
+    // Phase 3: Gemini
+    step.innerHTML='<span class="spin"></span> 🤖 Gemini يحلل البيانات ويصوغ الاقتراح...';
+    var sm={mild:'légère',moderate:'modérée',severe:'sévère'};
+    var prompt='Tu es un expert en psychopharmacologie clinique.\n\n'
+      +'PATIENT: '+PT.name+', '+PT.age+' ans, '+(PT.sex==='m'?'M':'F')+'\n'
+      +'Profession: '+(PT.job||'—')+'\nAntécédents: '+(PT.chr||'aucun')+'\n'
+      +'Médicaments actuels: '+(PT.med||'aucun')+'\nSymptômes: '+PT.sym+'\n'
+      +'Diagnostic: '+PT.diag+'\nSévérité: '+(sm[PT.sev]||PT.sev)+'\n'
+      +'Notes: '+(PT.note||'—')+'\n\n'
+      +'DONNÉES SCIENTIFIQUES EN TEMPS RÉEL:\n'+(ctx||'Utiliser guidelines standards')+'\n\n'
+      +'En te basant sur ces données, propose une suggestion pharmacologique evidence-based.\n\n'
+      +'FORMAT:\n═══════════════════════════\n'
+      +'📊 ANALYSE CLINIQUE\n[résumé 2-3 lignes]\n\n'
+      +'💊 SUGGESTION PRINCIPALE\nMédicament: [DCI]\n'
+      +'• Classe: ...\n• Dose initiale: ...\n• Dose cible: ...\n• Durée: ...\n'
+      +'• Niveau de preuve: [A/B/C]\n• Justification: [citer PMIDs si pertinents]\n\n'
+      +'⚠️ CONTRE-INDICATIONS & INTERACTIONS\n• [selon profil + données FDA]\n\n'
+      +'🔄 ALTERNATIVES\n• [option 2]\n• [option 3]\n\n'
+      +'📚 RÉFÉRENCES UTILISÉES\n[PMIDs des études PubMed]\n\n'
+      +'🩺 SUIVI\n• [délai réévaluation + bilan]\n'
+      +'═══════════════════════════\n'
+      +'⚠️ Suggestions consultatives. Décision finale = médecin traitant.';
+
+    var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+DOC.key,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:2500}})
+    });
+    var data=await r.json();
+    if(data.error) throw new Error(data.error.message);
+    var txt=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:'';
+    if(!txt) throw new Error('لم يتم الحصول على نتيجة');
+
+    AI_R=txt;
+    el('ai-text').textContent=txt;
+    res.style.display='block';
+    src.style.display='flex';
+    step.textContent='';
+    toast('✅ تم التحليل بناءً على دراسات حقيقية','ok');
+
+  }catch(e){
+    step.textContent='';
+    toast('❌ '+e.message,'err');
+  }finally{
+    btn.disabled=false;
+  }
+};
+
+// ── PRESCRIPTION ──
+window.gotoV=function(name){
+  if(name==='rx') showRx();
+  else gotoV_inner(name);
+};
+
+function showRx(){
+  var ds=new Date().toLocaleDateString('fr-DZ',{year:'numeric',month:'long',day:'numeric'});
+  el('rx-n').textContent=PT.name||'—';
+  el('rx-a').textContent=(PT.age||'—')+' سنة · '+(PT.sex==='m'?'ذكر':'أنثى');
+  el('rx-d').textContent=PT.diag||'—';
+  el('rx-date-h').textContent=ds;
+  el('rx-date-f').textContent=ds;
+  el('rx-doc-n').textContent=DOC.name;
+  el('rx-doc-s').textContent=DOC.spec;
+  if(AI_R) el('rx-drugs').value=AI_R;
+  gotoV_inner('rx');
+}
+
+function gotoV_inner(name){
+  VIEWS.forEach(function(v){var e=el('v-'+v);if(e)e.classList.remove('on');});
+  ['bn-dash','bn-new','bn-set'].forEach(function(n){var e=el(n);if(e)e.classList.remove('on');});
+  var t=el('v-'+name);
+  if(t) t.classList.add('on');
+  var nb=el(NAV_MAP[name]||'bn-dash');
+  if(nb) nb.classList.add('on');
+  el('app-scroll').scrollTop=0;
+  if(name==='dash')  refreshDash();
+  if(name==='set')   loadSet();
+  if(name==='new')   clearForm();
+}
+
+window.savePt=function(){
+  var p=collectPT();
+  if(!p.name){toast('⚠️ أدخل اسم المريض','err');return;}
+  if(!p.diag){toast('⚠️ أدخل التشخيص','err');return;}
+  p.rx=el('rx-drugs').value;
+  var idx=-1;
+  for(var i=0;i<PTS.length;i++){if(PTS[i].name===p.name){idx=i;break;}}
+  if(idx>=0) PTS[idx]=p; else PTS.push(p);
+  lsw('rxai_pts',PTS);
+  toast('✅ تم حفظ المريض','ok');
+  refreshDash();
+};
+
+window.doPrint=function(){
+  STAT.today++;
+  lsw('rxai_stat',STAT);
+  el('st-tod').textContent=STAT.today;
+  window.print();
+};
+
+// ── DASHBOARD ──
+function refreshDash(){
+  el('st-tot').textContent=PTS.length;
+  el('st-tod').textContent=STAT.today;
+  el('st-ai').textContent=STAT.ai;
+  var list=el('pts-list');
+  if(!PTS.length){
+    list.innerHTML='<div class="empty"><div class="empty-ico">📋</div><div>لا يوجد مرضى — اضغط "مريض جديد"</div></div>';
+    return;
+  }
+  var html='';
+  for(var i=0;i<PTS.length;i++){
+    var p=PTS[i];
+    html+='<div class="prow" onclick="loadPt('+i+')">'
+      +'<div><div class="prow-name">'+esc(p.name)+'</div><div class="prow-meta">'+esc(p.age)+' سنة · '+esc(p.job||'—')+'</div></div>'
+      +'<div><span class="pdiag-badge">'+esc(p.diag)+'</span><div class="pdate">📅 '+esc(p.date)+'</div></div>'
+      +'</div>';
+  }
+  list.innerHTML=html;
+}
+
+window.loadPt=function(idx){
+  var p=PTS[idx]; if(!p) return;
+  PT=JSON.parse(JSON.stringify(p));
+  VIEWS.forEach(function(v){var e=el('v-'+v);if(e)e.classList.remove('on');});
+  ['bn-dash','bn-new','bn-set'].forEach(function(n){var e=el(n);if(e)e.classList.remove('on');});
+  el('v-new').classList.add('on');
+  el('bn-new').classList.add('on');
+  el('p-name').value=p.name||'';
+  el('p-age').value=p.age||'';
+  el('p-sex').value=p.sex||'m';
+  el('p-job').value=p.job||'';
+  el('p-chr').value=p.chr||'';
+  el('p-med').value=p.med||'';
+  el('p-sym').value=p.sym||'';
+  el('p-diag').value=p.diag||'';
+  el('p-sev').value=p.sev||'moderate';
+  el('p-note').value=p.note||'';
+  el('app-scroll').scrollTop=0;
+};
+
+// ── SETTINGS ──
+function loadSet(){
+  el('s-name').value=DOC.name;
+  el('s-spec').value=DOC.spec;
+  el('s-key').value=DOC.key;
+}
+window.saveSet=function(){
+  DOC.name=el('s-name').value.trim();
+  DOC.spec=el('s-spec').value.trim();
+  DOC.key=el('s-key').value.trim();
+  lsw('rxai_doc',DOC);
+  applyDocToUI();
+  toast('✅ تم حفظ الإعدادات','ok');
+};
+
+// ── INIT ──
+PTS=ls('rxai_pts',[]);
+STAT=ls('rxai_stat',{today:0,ai:0});
+var sd=ls('rxai_doc',null);
+if(sd){
+  el('i-name').value=sd.name||'';
+  el('i-spec').value=sd.spec||'';
+  el('i-key').value=sd.key||'';
+}else{
+  el('i-name').value='Dr. Amin Bellala';
+  el('i-spec').value='Psychiatre — Psychologue Clinicien';
+}
+
+})();
+</script>
+</body>
+</html>
